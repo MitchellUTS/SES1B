@@ -1,0 +1,7 @@
+README
+
+Before running, need to install CORS. 
+
+Open api directory in command line: 'npm install --save cors'
+
+Start up express api using 'npm start'
