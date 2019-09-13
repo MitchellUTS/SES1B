@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+        content="ie=edge">
+        <title>Succesful Payment</title>
+    </head>
+    <body>
+        <h1>Receipt:</h1>
+        <h2>Payer ID: <%= payerId %></h2>
+        <h2>Payment ID: <%= paymentId %></h2>
+        <h2>Total: $<%= payment %></h2>
+        <form action="/" method="get">
+            <input type="submit" value="Return">
+        </form>
+    </body>
+</html>
