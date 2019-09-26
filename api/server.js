@@ -53,7 +53,7 @@ if (process.env.NODE_ENV !== 'production') {
         name: 'intel i5',
         sku: '001',
         price: '299.00',
-        description: 'intel dual core i5 7th gen processor'
+        description: 'intel dual core i5 8th gen processor'
       },
       {
         name: 'test 2',
