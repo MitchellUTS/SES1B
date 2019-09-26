@@ -47,7 +47,28 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(methodOverride('_method'))
   
   app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', { name: req.user.name })
+    //Add products in here to add to the catalogue page
+    let products = [
+      {
+        name: 'intel i5',
+        sku: '001',
+        price: '299.00',
+        description: 'intel dual core i5 7th gen processor'
+      },
+      {
+        name: 'test 2',
+        sku: '002',
+        price: '95.00',
+        description: 'this is a test description'
+      },
+      {
+        name: 'test 3',
+        sku: '003',
+        price: '10.00',
+        description: 'this is a test 3 description'
+      }
+    ]
+    res.render('index.ejs', { name: req.user.name, items: products })
   })
   
   app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -107,6 +128,10 @@ paypal.configure({
 });
 
 app.post('/pay', (req, res) => {
+
+  var price = req.body.price;
+  console.log(price);
+
   const create_payment_json = {
     "intent": "sale",
     "payer": {
@@ -226,6 +251,6 @@ async function sendEmail(recipients, subject, body) {
     // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
 }
 
-module.exports = app;
+exports = app;
 
 app.listen(port, () => console.log("Server Started. \nListening on Port:" + port + "\nPress Ctrl + C to stop the server.\n"));
