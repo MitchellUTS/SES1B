@@ -22,10 +22,30 @@ if (process.env.NODE_ENV !== 'production') {
   const session = require('express-session')
   const methodOverride = require('method-override')
 
+  var mysql = require('mysql');
+/*const pool = mysql.createPool({
+	connectionLimit : 100,
+	host : 'localhost',
+	database : 'test',
+	user : 'root',
+	password : 'pass123',
+	debug : false
+});*/
+
+const pool = mysql.createPool({
+	connectionLimit : 100,
+	host : 'leenet.net.au',
+	database : 'test',
+	user : 'admin',
+	password : 'password',
+	port : "3360",
+	debug : false
+});
+  
   const initializePassport = require('./passport-config')
   initializePassport(
     passport,
-    email => users.find(user => user.email === email),
+    email => ,
     id => users.find(user => user.id === id)
   )
   
@@ -88,12 +108,24 @@ if (process.env.NODE_ENV !== 'production') {
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
+      var idVar = Date.now().toString();
+      var nameVar = req.body.name;
+      var emailVar = req.body.email;
+      var passwordVar = hashedPassword;
       users.push({
-        id: Date.now().toString(),
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
+        id: idVar,
+        name: nameVar,
+        email: emailVar,
+        password: passwordVar
       })
+      
+      //Insert query call
+      setTimeout(() => {
+      //call the function
+    	registerUserAddRow({
+    	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
+    	});
+      },5000);
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
       res.redirect('/login')
     } catch {
@@ -249,6 +281,61 @@ async function sendEmail(recipients, subject, body) {
     // Preview only available when sending through an Ethereal account
     //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
     // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+}
+
+function handle_database(req,res) {
+    // connection will be acquired automatically
+    pool.query("select * from user", function(err,rows){
+     if(err) {
+         return res.json({'error': true, 'message': 'Error occurred'+err});
+     }
+             //connection will be released as well.
+             res.json(rows);
+    });
+}
+
+app.get("/",function(req,res){-
+     handle_database(req,res);
+});
+
+//add rows in the table
+
+function registerUserAddRow(data) {
+
+var numberOfFields = data.fieldValue.length;
+
+let insertQuery = 'INSERT INTO ?? (??,??,??,??) VALUES (?,?,?,?)'
+
+var query;
+
+query = mysql.format(insertQuery,["user","ID","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2],data.fieldValue[3]]);
+
+console.log(query);
+
+pool.query(query,(err, response) => {
+    if(err) {
+        console.error(err);
+        return;
+    }
+    // rows added
+    console.log(response.insertId);
+});
+}
+
+//update rows
+
+function updateUserPassword(data) {
+  let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
+  let query = mysql.format(updateQuery,["user","Password",data.Password,"EmailAddress",data.EmailAddress]);
+  // query = UPDATE `user` SET `EmailAddress`='12875822@student.uts.edu.au' WHERE `Name`='Matt'
+  pool.query(query,(err, response) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows updated
+      console.log(response.affectedRows);
+  });
 }
 
 exports = app;
