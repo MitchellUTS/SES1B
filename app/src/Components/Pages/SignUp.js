@@ -106,6 +106,12 @@ export default function SignUp() {
                 label="I want to receive inspiration, marketing promotions and updates via email."
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={<Checkbox value="allowExtraEmails" color="primary" />}
+                label="I am a seller"
+              />
+            </Grid>
           </Grid>
           <Link to="/Product"><Button
             type="submit"
