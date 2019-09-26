@@ -45,7 +45,11 @@ const pool = mysql.createPool({
   const initializePassport = require('./passport-config')
   initializePassport(
     passport,
-    email => ,
+    email => setTimeout(() => {
+    	  // call the function
+    	  // select rows
+    	  findEmailQuery(email);
+    	},5000),
     id => users.find(user => user.id === id)
   )
   
@@ -335,6 +339,22 @@ function updateUserPassword(data) {
       }
       // rows updated
       console.log(response.affectedRows);
+  });
+}
+
+//query rows in the table
+
+function findEmailQuery(emailAddress) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
+  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
+  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+  pool.query(query,(err, data) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows fetch
+      return data;
   });
 }
 
