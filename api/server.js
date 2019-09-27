@@ -371,7 +371,56 @@ function findUserById(Id) {
   });
 }
 
+function getAllItems() {
+  return new Promise(function(resolve, reject) {
+    let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
+    let query = mysql.format(selectQuery,["item"]);
+    // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+    pool.query(query,(err, data) => {
+        if(err) {
+            console.error(err);
+            reject(err);
+            return;
+        }
+        // rows fetch
+        //console.log(data);
+        resolve(data);
+    });
+  });
+}
+
+function addItemToDatabase(data) {
+
+  var numberOfFields = data.fieldValue.length;
+  
+  let insertQuery = 'INSERT INTO item (Name, Description, CostPrice, RetailPrice, Quantity, SellerID, ImagePath) VALUES (?,?,?,?,?,?,?)'
+  
+  var query;
+  
+  query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
+  
+  //console.log(query);
+  
+  pool.query(query,(err, response) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows added
+      console.log(response.insertId);
+  });
+}
+
 exports = app;
+
+async function f() {
+  let results = await getAllItems();
+  console.log(results[0]);
+}
+
+//getAllItems().then(data => {console.log("getAllItems:", data);});
+f();
+//console.log(findUserById(1));
 
 console.log("Random Password:", generatePassword(10));
 
