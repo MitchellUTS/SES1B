@@ -81,7 +81,7 @@ const pool = mysql.createPool({
         name: 'intel i5',
         sku: '001',
         price: '299.00',
-        description: 'intel dual core i5 7th gen processor'
+        description: 'intel dual core i5 8th gen processor'
       },
       {
         name: 'test 2',
@@ -257,20 +257,14 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// async..await is not allowed in global scope, must use a wrapper
 async function sendEmail(recipients, subject, body) {
-    // Generate test SMTP service account from ethereal.email
-    // Only needed if you don't have a real mail account for testing
-    //let testAccount = await nodemailer.createTestAccount();
-
-    // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false, 
         auth: {
-            user: 'softwarestudio1b@gmail.com', // generated ethereal user
-            pass: 'Sasuke12345!' // generated ethereal password
+            user: 'softwarestudio1b@gmail.com', 
+            pass: 'Sasuke12345!' 
         }
     });
 
@@ -283,12 +277,11 @@ async function sendEmail(recipients, subject, body) {
         //html: '<b>Your email has been verified</b>' // html body
     });
 
-    console.log('Message sent: %s', info.messageId);
-    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    //console.log('Message sent: %s', info.messageId);
+}
 
-    // Preview only available when sending through an Ethereal account
-    //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+function generatePassword(length) {
+  return Math.random().toString(36).replace(/[^a-z0-9]+/g, '').substr(2, length);
 }
 
 function handle_database(req,res) {
@@ -380,4 +373,6 @@ function findUserById(Id) {
 
 exports = app;
 
-app.listen(port, () => console.log("Server Started. \nListening on Port:" + port + "\nPress Ctrl + C to stop the server.\n"));
+console.log("Random Password:", generatePassword(10));
+
+app.listen(port, () => console.log("Server Started. \nOpen localhost:" + port + " in your browser to view the page.\nListening on Port: " + port + "\nPress Ctrl + C to stop the server.\n"));

@@ -7,22 +7,22 @@
         <title>PayPal Node</title>
     </head>
     <body>
-            <h1>All Products</h1>
-            <% for(let i = 0; i < items.length; i++) { %>
-                <article>
-                    <h2><%= items[i].name %></h1>
-                    <p><%= items[i].description %></p>
-                    <form action="/pay" method="post">
-                        <input type="submit" value="Buy">
-                    </form>
-                </article>
-            <% } %>
-        </body>
-    <!-- <body>
-        <h1>Intel Core i5 8400 CPU</h1>
-        <h2>Buy for $299</h2>
-        <form action="/pay" method="post">
-            <input type="submit" value="Buy">
-        </form>
-    </body> -->
+        <h1>All Products</h1>
+        <% for(let i = 0; i < items.length; i++) { %>
+            <article>
+                <h2><%= items[i].name %></h1>
+                <p><%= items[i].description %></p>
+                <form >
+                    <input type="submit" value="Buy" onclick="myFunction(i)">
+                </form>
+            </article>
+        <% } %>
+    </body>
+
+    <script>
+        function myFunction() {
+            $( "#yourmodal" ).load( "/pay" );
+        }
+    </script>
+
 </html>
