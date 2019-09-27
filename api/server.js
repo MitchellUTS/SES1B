@@ -45,16 +45,18 @@ const pool = mysql.createPool({
   const initializePassport = require('./passport-config')
   initializePassport(
     passport,
-    email => setTimeout(() => {
+    email => users.find(user => user.email === email),
+    id => users.find(user => user.id === id)
+    //email => setTimeout(() => {
     	  // call the function
     	  // select rows
-    	  findUserByEmail(email);
-    	},5000),
-    id => setTimeout(() => {
+    	  //findUserByEmail(email);
+    	//},5000),
+    //id => setTimeout(() => {
   	  // call the function
   	  // select rows
-  	  findUserById(id);
-  	},5000)
+  	  //findUserById(id);
+    //},5000)
   )
   
   const port = 3000;
@@ -73,7 +75,15 @@ const pool = mysql.createPool({
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
+
+  app.get('/test', (req, res) => {
+    res.render('test.ejs', {testdata: 900});
+  });
   
+  app.post('/test', (req, res) => {
+    console.log(req.body);
+  });
+
   app.get('/', checkAuthenticated, (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
@@ -128,12 +138,12 @@ const pool = mysql.createPool({
       })
       
       //Insert query call
-      setTimeout(() => {
+      /*setTimeout(() => {
       //call the function
     	registerUserAddRow({
     	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
     	});
-      },5000);
+      },5000);*/
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
       res.redirect('/login')
     } catch {
@@ -168,8 +178,7 @@ paypal.configure({
 });
 
 app.post('/pay', (req, res) => {
-
-  var price = req.body.price;
+  console.log(req.body);
   console.log(price);
 
   const create_payment_json = {
@@ -415,13 +424,15 @@ exports = app;
 
 async function f() {
   let results = await getAllItems();
-  console.log(results[0]);
+  console.log(results[2].sku);
 }
 
 //getAllItems().then(data => {console.log("getAllItems:", data);});
-f();
+//f();
+//addItemToDatabase({'fieldValue': ["AMD CPU", "WOW very good product2", 99.95, 2]});
+
 //console.log(findUserById(1));
 
-console.log("Random Password:", generatePassword(10));
+//console.log("Random Password:", generatePassword(10));
 
 app.listen(port, () => console.log("Server Started. \nOpen localhost:" + port + " in your browser to view the page.\nListening on Port: " + port + "\nPress Ctrl + C to stop the server.\n"));

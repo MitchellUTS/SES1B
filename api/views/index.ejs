@@ -7,22 +7,28 @@
         <title>PayPal Node</title>
     </head>
     <body>
+
+        <h1>OLD Intel Core i5 8400 CPU</h1>
+        <h2>OLD Buy for $299</h2>
+        <form action="/pay" method="POST">
+            <input type="submit" value="OLD Buy">
+            <input id="sku" value=001 required>
+        </form>
+
+        <hr>
+
         <h1>All Products</h1>
         <% for(let i = 0; i < items.length; i++) { %>
             <article>
                 <h2><%= items[i].name %></h1>
                 <p><%= items[i].description %></p>
-                <form >
-                    <input type="submit" value="Buy" onclick="myFunction(i)">
+                <form action="/pay" method="post">
+                    <input type="submit" value="Buy">
+                    <input type="hidden" name="hiddenField" value = "yay it worked">
+                    <input id="sku" value=<%= items[i].sku %>>
                 </form>
             </article>
         <% } %>
     </body>
-
-    <script>
-        function myFunction() {
-            $( "#yourmodal" ).load( "/pay" );
-        }
-    </script>
 
 </html>

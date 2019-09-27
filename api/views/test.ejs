@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+        content="ie=edge">
+        <title>This page is for testing</title>
+    </head>
+    <body>
+        <h1>ERROR: You shouldn't be here.</h1>
+
+        <form action="/test" method="POST">
+            <div>
+                <label for="password">Test</label>
+                <input type="text" id="data" name="data" value=<%= testdata %>>
+                <input type="hidden" name="hiddenField" value = "yay it worked">
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+
+    </body>
+</html>
