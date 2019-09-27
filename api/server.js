@@ -179,9 +179,9 @@ paypal.configure({
 
 app.post('/pay', (req, res) => {
 
-  console.log(req.body);
-  //var price = req.body.price;
-  //console.log(price);
+  //console.log(req.body);
+  var price = req.body.price;
+  console.log(price);
 
   const create_payment_json = {
     "intent": "sale",
