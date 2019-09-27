@@ -8,12 +8,11 @@
     </head>
     <body>
 
-        <h1>OLD Intel Core i5 8400 CPU</h1>
-        <h2>OLD Buy for $299</h2>
-        <form action="/pay" method="POST">
-            <input type="submit" value="OLD Buy">
-            <input id="sku" value=001 required>
-        </form>
+            <h1>Intel Core i5 8400 CPU</h1>
+            <h2>Buy for $299</h2>
+            <form action="/pay" method="post">
+                <input type="submit" value="Buy">
+            </form>
 
         <hr>
 
@@ -22,10 +21,10 @@
             <article>
                 <h2><%= items[i].name %></h1>
                 <p><%= items[i].description %></p>
-                <form action="/pay" method="post">
+                <form action="/pay" method="POST">
+                    <input type="hidden" name="hiddenField" value = <%= items[i].name %>>
+                    <input type="hidden" id="sku" value=<%= items[i].sku %>>
                     <input type="submit" value="Buy">
-                    <input type="hidden" name="hiddenField" value = "yay it worked">
-                    <input id="sku" value=<%= items[i].sku %>>
                 </form>
             </article>
         <% } %>

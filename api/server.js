@@ -83,7 +83,7 @@ const pool = mysql.createPool({
   app.post('/test', (req, res) => {
     console.log(req.body);
   });
-
+  
   app.get('/', checkAuthenticated, (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
@@ -178,8 +178,10 @@ paypal.configure({
 });
 
 app.post('/pay', (req, res) => {
+
   console.log(req.body);
-  console.log(price);
+  //var price = req.body.price;
+  //console.log(price);
 
   const create_payment_json = {
     "intent": "sale",
