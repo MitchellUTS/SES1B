@@ -48,13 +48,17 @@ const pool = mysql.createPool({
     email => setTimeout(() => {
     	  // call the function
     	  // select rows
-    	  findEmailQuery(email);
+    	  findUserByEmail(email);
     	},5000),
-    id => users.find(user => user.id === id)
+    id => setTimeout(() => {
+  	  // call the function
+  	  // select rows
+  	  findUserById(id);
+  	},5000)
   )
   
   const port = 3000;
-  const users = []
+  const users = [];
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -344,9 +348,25 @@ function updateUserPassword(data) {
 
 //query rows in the table
 
-function findEmailQuery(emailAddress) {
+function findUserByEmail(emailAddress) {
   let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
   let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
+  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+  pool.query(query,(err, data) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows fetch
+      return data;
+  });
+}
+
+//query rows in the table
+
+function findUserById(Id) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
+  let query = mysql.format(selectQuery,["user","ID", Id]);
   // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
   pool.query(query,(err, data) => {
       if(err) {
