@@ -22,15 +22,45 @@ if (process.env.NODE_ENV !== 'production') {
   const session = require('express-session')
   const methodOverride = require('method-override')
 
+  var mysql = require('mysql');
+/*const pool = mysql.createPool({
+	connectionLimit : 100,
+	host : 'localhost',
+	database : 'test',
+	user : 'root',
+	password : 'pass123',
+	debug : false
+});*/
+
+const pool = mysql.createPool({
+	connectionLimit : 100,
+	host : 'leenet.net.au',
+	database : 'test',
+	user : 'admin',
+	password : 'password',
+	port : "3360",
+	debug : false
+});
+  
   const initializePassport = require('./passport-config')
   initializePassport(
     passport,
     email => users.find(user => user.email === email),
     id => users.find(user => user.id === id)
+    //email => setTimeout(() => {
+    	  // call the function
+    	  // select rows
+    	  //findUserByEmail(email);
+    	//},5000),
+    //id => setTimeout(() => {
+  	  // call the function
+  	  // select rows
+  	  //findUserById(id);
+    //},5000)
   )
   
   const port = 3000;
-  const users = []
+  const users = [];
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -45,28 +75,36 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
+
+  app.get('/test', (req, res) => {
+    res.render('test.ejs', {testdata: 900});
+  });
+  
+  app.post('/test', (req, res) => {
+    console.log(req.body);
+  });
   
   app.get('/', checkAuthenticated, (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
       {
-        name: 'intel i5',
+        name: "intel i5",
         sku: '001',
         price: '299.00',
-        description: 'intel dual core i5 7th gen processor'
+        description: "intel dual core i5 8th gen processor"
       },
       {
-        name: 'test 2',
+        name: "test 2",
         sku: '002',
         price: '95.00',
-        description: 'this is a test description'
+        description: "this is a test description"
       },
       {
-        name: 'test 3',
+        name: "test 3",
         sku: '003',
         price: '10.00',
-        description: 'this is a test 3 description'
-      }
+        description: "this is a test 3 description"
+      },
     ]
     res.render('index.ejs', { name: req.user.name, items: products })
   })
@@ -88,12 +126,24 @@ if (process.env.NODE_ENV !== 'production') {
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
+      var idVar = Date.now().toString();
+      var nameVar = req.body.name;
+      var emailVar = req.body.email;
+      var passwordVar = hashedPassword;
       users.push({
-        id: Date.now().toString(),
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
+        id: idVar,
+        name: nameVar,
+        email: emailVar,
+        password: passwordVar
       })
+      
+      //Insert query call
+      /*setTimeout(() => {
+      //call the function
+    	registerUserAddRow({
+    	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
+    	});
+      },5000);*/
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
       res.redirect('/login')
     } catch {
@@ -130,7 +180,10 @@ paypal.configure({
 app.post('/pay', (req, res) => {
 
   var price = req.body.price;
-  console.log(price);
+  var sku = req.body.sku;
+  var name = req.body.name;
+  var description = req.body.description;
+  console.log(req.body);
 
   const create_payment_json = {
     "intent": "sale",
@@ -144,18 +197,18 @@ app.post('/pay', (req, res) => {
     "transactions": [{
       "item_list": {
         "items": [{
-          "name": "Intel Core i5",
-          "sku": "001",
-          "price": "299.00",
+          "name": name,
+          "sku": sku,
+          "price": '0.00',
           "currency": "AUD",
           "quantity": 1
         }]
       },
       "amount": {
         "currency": "AUD",
-        "total": "299.00"
+        "total": price
       },
-        "description": "A CPU"
+        "description": description
     }]
   };
   
@@ -217,20 +270,14 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// async..await is not allowed in global scope, must use a wrapper
 async function sendEmail(recipients, subject, body) {
-    // Generate test SMTP service account from ethereal.email
-    // Only needed if you don't have a real mail account for testing
-    //let testAccount = await nodemailer.createTestAccount();
-
-    // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false, 
         auth: {
-            user: 'softwarestudio1b@gmail.com', // generated ethereal user
-            pass: 'Sasuke12345!' // generated ethereal password
+            user: 'softwarestudio1b@gmail.com', 
+            pass: 'Sasuke12345!' 
         }
     });
 
@@ -243,14 +290,153 @@ async function sendEmail(recipients, subject, body) {
         //html: '<b>Your email has been verified</b>' // html body
     });
 
-    console.log('Message sent: %s', info.messageId);
-    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    //console.log('Message sent: %s', info.messageId);
+}
 
-    // Preview only available when sending through an Ethereal account
-    //console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+function generatePassword(length) {
+  return Math.random().toString(36).replace(/[^a-z0-9]+/g, '').substr(2, length);
+}
+
+function handle_database(req,res) {
+    // connection will be acquired automatically
+    pool.query("select * from user", function(err,rows){
+     if(err) {
+         return res.json({'error': true, 'message': 'Error occurred'+err});
+     }
+             //connection will be released as well.
+             res.json(rows);
+    });
+}
+
+app.get("/",function(req,res){-
+     handle_database(req,res);
+});
+
+//add rows in the table
+
+function registerUserAddRow(data) {
+
+var numberOfFields = data.fieldValue.length;
+
+let insertQuery = 'INSERT INTO ?? (??,??,??,??) VALUES (?,?,?,?)'
+
+var query;
+
+query = mysql.format(insertQuery,["user","ID","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2],data.fieldValue[3]]);
+
+console.log(query);
+
+pool.query(query,(err, response) => {
+    if(err) {
+        console.error(err);
+        return;
+    }
+    // rows added
+    console.log(response.insertId);
+});
+}
+
+//update rows
+
+function updateUserPassword(data) {
+  let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
+  let query = mysql.format(updateQuery,["user","Password",data.Password,"EmailAddress",data.EmailAddress]);
+  // query = UPDATE `user` SET `EmailAddress`='12875822@student.uts.edu.au' WHERE `Name`='Matt'
+  pool.query(query,(err, response) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows updated
+      console.log(response.affectedRows);
+  });
+}
+
+//query rows in the table
+
+function findUserByEmail(emailAddress) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
+  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
+  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+  pool.query(query,(err, data) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows fetch
+      return data;
+  });
+}
+
+//query rows in the table
+
+function findUserById(Id) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
+  let query = mysql.format(selectQuery,["user","ID", Id]);
+  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+  pool.query(query,(err, data) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows fetch
+      return data;
+  });
+}
+
+function getAllItems() {
+  return new Promise(function(resolve, reject) {
+    let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
+    let query = mysql.format(selectQuery,["item"]);
+    // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+    pool.query(query,(err, data) => {
+        if(err) {
+            console.error(err);
+            reject(err);
+            return;
+        }
+        // rows fetch
+        //console.log(data);
+        resolve(data);
+    });
+  });
+}
+
+function addItemToDatabase(data) {
+
+  var numberOfFields = data.fieldValue.length;
+  
+  let insertQuery = 'INSERT INTO item (Name, Description, CostPrice, RetailPrice, Quantity, SellerID, ImagePath) VALUES (?,?,?,?,?,?,?)'
+  
+  var query;
+  
+  query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
+  
+  //console.log(query);
+  
+  pool.query(query,(err, response) => {
+      if(err) {
+          console.error(err);
+          return;
+      }
+      // rows added
+      console.log(response.insertId);
+  });
 }
 
 exports = app;
 
-app.listen(port, () => console.log("Server Started. \nListening on Port:" + port + "\nPress Ctrl + C to stop the server.\n"));
+async function f() {
+  let results = await getAllItems();
+  console.log(results[2].sku);
+}
+
+//getAllItems().then(data => {console.log("getAllItems:", data);});
+//f();
+//addItemToDatabase({'fieldValue': ["AMD CPU", "WOW very good product2", 99.95, 2]});
+
+//console.log(findUserById(1));
+
+//console.log("Random Password:", generatePassword(10));
+
+app.listen(port, () => console.log("Server Started. \nOpen localhost:" + port + " in your browser to view the page.\nListening on Port: " + port + "\nPress Ctrl + C to stop the server.\n"));
