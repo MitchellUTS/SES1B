@@ -83,8 +83,25 @@ const pool = mysql.createPool({
   app.post('/test', (req, res) => {
     console.log(req.body);
   });
+
+  app.get('/adding', (req, res) => {
+    res.render('adding.ejs');
+  });
   
-  app.get('/', checkAuthenticated, (req, res) => {
+  app.post('/adding', (req, res) => {
+    console.log(req.body.name);
+    console.log(req.body.price);
+    console.log(req.body.description);
+    if(req.body.name.length > 0 && req.body.price.length > 0 && req.body.description.length > 0){
+      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price]});
+    }
+    else{
+      console.log("Not all fields have been filled.");
+    }
+    res.render('adding.ejs');
+  });
+  
+  app.all('/', checkAuthenticated, (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
       {
@@ -144,7 +161,7 @@ const pool = mysql.createPool({
     	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
     	});
       },5000);*/
-      sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
+      sendEmail(req.body.email, "Thank you for creating an account with Lavender", "You have been given a random new password: " + generatePassword());
       res.redirect('/login')
     } catch {
       res.redirect('/register')
@@ -290,7 +307,7 @@ async function sendEmail(recipients, subject, body) {
         //html: '<b>Your email has been verified</b>' // html body
     });
 
-    //console.log('Message sent: %s', info.messageId);
+    console.log('Message sent to: ' + recipients);
 }
 
 function generatePassword(length) {
@@ -433,7 +450,7 @@ async function f() {
 
 //getAllItems().then(data => {console.log("getAllItems:", data);});
 //f();
-//addItemToDatabase({'fieldValue': ["AMD CPU", "WOW very good product2", 99.95, 2]});
+//addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
 
 //console.log(findUserById(1));
 

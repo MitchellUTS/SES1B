@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+        content="ie=edge">
+        <title>This page is for testing</title>
+    </head>
+    <body>
+        <h1>Add a product.</h1>
+
+        <form action="/adding" method="POST">
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name">
+            </div>
+            <div>
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price">
+            </div>
+            <div>
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description">
+            </div>
+            <button type="submit">Add</button>
+        </form>
+
+        <form action="/" method="POST">
+            <input type="submit" value="Return">
+        </form>
+
+    </body>
+</html>
