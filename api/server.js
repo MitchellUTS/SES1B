@@ -21,6 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
   const flash = require('express-flash')
   const session = require('express-session')
   const methodOverride = require('method-override')
+  const bodyParser = require("body-parser");
 
   const initializePassport = require('./passport-config')
   initializePassport(
@@ -46,6 +47,8 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
 
   app.get('/list', (req, res) => {
     res.json(['one', 'two', 'three']);
@@ -57,10 +60,20 @@ if (process.env.NODE_ENV !== 'production') {
 
   app.post('/list', (req, res) => {
     console.log(req.body);
-    //)
-    //res.redirect('list');
+    res.send("Success your POST requested contained: " + JSON.stringify(req.body));
   })
   
+  app.post('/template', (req, res) => {
+    let string = ("Your request was successfully recieved.\n\n" + 
+                  "Sender/Referrer:      " + req.headers.referer +"\n" + 
+                  "Request Method/Type:  " + req.method + "\n" +
+                  "Destination:          " + req.headers.host + req.url + "\n\n" +
+                  "Body: " + JSON.stringify(req.body));
+    console.log(string);
+    res.send(string);
+    //res.redirect('back');
+  })
+
   app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs')
   })
