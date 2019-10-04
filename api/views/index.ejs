@@ -13,10 +13,10 @@
                 <h2><%= items[i].name %></h1>
                 <p><%= items[i].description %></p>
                 <form action="/pay" method="POST">
-                    <input type="hidden" name="sku" value=<%= items[i].sku %>>
-                    <input type="hidden" name="price" value=<%= items[i].price %>>
-                    <input type="hidden" name="name" value=<%= items[i].name %>>
-                    <input type="hidden" name="description" value=<%= items[i].description %>>
+                    <input type="hidden" name="sku" value="<%= items[i].sku %>">
+                    <input type="hidden" name="price" value="<%= items[i].price %>">
+                    <input type="hidden" name="name" value="<%= items[i].name %>">
+                    <input type="hidden" name="description" value="<%= items[i].description %>">
                     <input type="submit" value="Buy">
                 </form>
             </article>
@@ -24,7 +24,7 @@
     </body>
 
     <h3>Add an Item to the Catalogue:</h3>
-    <form action="/adding" method="POST">
+    <form action="/adding" method="GET">
         <input type="submit" value="Add Item">
     </form>
 

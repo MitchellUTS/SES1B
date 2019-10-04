@@ -88,12 +88,13 @@ const pool = mysql.createPool({
     res.render('adding.ejs');
   });
   
-  app.post('/adding', (req, res) => {
+  app.all('/adding', (req, res) => {
     console.log(req.body.name);
     console.log(req.body.price);
     console.log(req.body.description);
     if(req.body.name.length > 0 && req.body.price.length > 0 && req.body.description.length > 0){
-      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price]});
+      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100]});
+      // addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00]});
     }
     else{
       console.log("Not all fields have been filled.");
@@ -101,7 +102,7 @@ const pool = mysql.createPool({
     res.render('adding.ejs');
   });
   
-  app.all('/', checkAuthenticated, (req, res) => {
+  app.all('/', checkAuthenticated, async (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
       {
@@ -123,6 +124,7 @@ const pool = mysql.createPool({
         description: "this is a test 3 description"
       },
     ]
+    products = await getAllItems();
     res.render('index.ejs', { name: req.user.name, items: products })
   })
   
@@ -135,6 +137,14 @@ const pool = mysql.createPool({
     failureRedirect: '/login',
     failureFlash: true
   }))
+
+  app.get('/passwordReset', checkNotAuthenticated, (req, res) => {
+    res.render('passwordReset.ejs')
+  })
+  
+  app.post('/passwordReset', checkNotAuthenticated, async (req, res) => {
+    res.render('passwordReset.ejs')
+  })
   
   app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
@@ -451,7 +461,7 @@ async function f() {
 //getAllItems().then(data => {console.log("getAllItems:", data);});
 //f();
 //addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
-
+// addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
 //console.log(findUserById(1));
 
 //console.log("Random Password:", generatePassword(10));
