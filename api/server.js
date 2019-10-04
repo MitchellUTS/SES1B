@@ -69,7 +69,7 @@ initializePassport(
   const port = 3000;
   const users = [];
   
-  var max;
+  /*var max;
   findHighestId(function(result){
   	  max = result;
   	for (let i = 1; i < max; i++) {
@@ -97,7 +97,10 @@ initializePassport(
   	  		});
   	  	});
   	  }
-  });
+  });*/
+  
+  populateUsersID(1).then(data => console.log(data));
+  queryWrapper();
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -445,17 +448,24 @@ function findPasswordById(id, callback) {
 	  });
 }
 
-function populateUsersID(index, callback) {
+async function queryWrapper() {
+	console.log(await populateUsersID(1));
+}
+
+function populateUsersID(index) {
+	return new Promise(function (resolve, reject) {
 	let selectQuery = 'SELECT * FROM ??';
 	let query = mysql.format(selectQuery,["user"]);
 	pool.query(query,(err, data) => {
 	      if(err) {
 	          console.error(err);
+	          reject(err);
 	          return;
 	      }
 	      // rows fetch
-	      return callback(data[index].ID);
+	      resolve(data[index].ID);
 	  });
+	});
 }
 
 function populateUsersName(index, callback) {
