@@ -42,23 +42,62 @@ const pool = mysql.createPool({
 	debug : false
 });
   
-  const initializePassport = require('./passport-config')
+const initializePassport = require('./passport-config')
+initializePassport(
+  passport,
+  email => users.find(user => user.email === email),
+  id => users.find(user => user.id === id)
+)
+
+  /*const initializePassport = require('./passport-config')
   initializePassport(
     passport,
-    email => setTimeout(() => {
-    	  // call the function
-    	  // select rows
-    	  findUserByEmail(email);
-    	},5000),
-    id => setTimeout(() => {
-  	  // call the function
-  	  // select rows
-  	  findUserById(id);
-  	},5000)
-  )
+    email => findUserByEmail(function (email, result){
+    	email = result;
+    	console.log("logging " + email);
+    }),
+    id => findUserIdByEmail(function (email, result){
+    	id = result;
+    	console.log("logging " + id);
+    }),
+    password => findPasswordById(function (id, result){
+    	password = result;
+    	console.log("logging " + password);
+    })
+  )*/
   
   const port = 3000;
   const users = [];
+  
+  var max;
+  findHighestId(function(result){
+  	  max = result;
+  	for (let i = 1; i < max; i++) {
+  		var tempUserId;
+  		var tempUserName;
+  		var tempUserEmail;
+  		var tempUserPassword;
+  	  	populateUsersID(i, function (result){
+  	  		tempUserId = result;
+  	  		populateUsersName(i, function (result){
+  	  			tempUserName = result;
+  	  			populateUsersEmailAddress(i, function (result){
+  	  				tempUserEmail = result;
+  	  				populateUsersPassword(i, function (result){
+  	  					tempUserPassword = result;
+  	  					users.push({
+  	  	  	  				id: tempUserId,
+  	  	  	  	    		name: tempUserName,
+  	  	  	  	    		email: tempUserEmail,
+  	  	  	  	    		password: tempUserPassword
+  	  	  	  			})
+  	  	  	  			console.log(users[i]);
+  	  				});
+  	  			});
+  	  		});
+  	  	});
+  	  }
+  });
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -116,7 +155,10 @@ const pool = mysql.createPool({
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
-      var idVar = Date.now().toString();
+      var idVar;
+      findHighestId(function(result){
+    	  idVar = result;
+      });
       var nameVar = req.body.name;
       var emailVar = req.body.email;
       var passwordVar = hashedPassword;
@@ -131,7 +173,7 @@ const pool = mysql.createPool({
       setTimeout(() => {
       //call the function
     	registerUserAddRow({
-    	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
+    	  "fieldValue": [idVar+1,nameVar,emailVar,passwordVar]
     	});
       },5000);
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
@@ -310,24 +352,24 @@ app.get("/",function(req,res){-
 
 function registerUserAddRow(data) {
 
-var numberOfFields = data.fieldValue.length;
+	var numberOfFields = data.fieldValue.length;
 
-let insertQuery = 'INSERT INTO ?? (??,??,??,??) VALUES (?,?,?,?)'
+	let insertQuery = 'INSERT INTO ?? (??,??,??,??) VALUES (?,?,?,?)'
 
-var query;
+	var query;
 
-query = mysql.format(insertQuery,["user","ID","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2],data.fieldValue[3]]);
+	query = mysql.format(insertQuery,["user","ID","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2],data.fieldValue[3]]);
 
-console.log(query);
+	console.log(query);
 
-pool.query(query,(err, response) => {
-    if(err) {
-        console.error(err);
-        return;
-    }
-    // rows added
-    console.log(response.insertId);
-});
+	pool.query(query,(err, response) => {
+    	if(err) {
+        	console.error(err);
+        	return;
+    	}
+    	// rows added
+    	console.log(response.insertId);
+	});
 }
 
 //update rows
@@ -348,8 +390,8 @@ function updateUserPassword(data) {
 
 //query rows in the table
 
-function findUserByEmail(emailAddress) {
-  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
+function findUserByEmail(emailAddress, callback) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';    
   let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
   // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
   pool.query(query,(err, data) => {
@@ -358,15 +400,15 @@ function findUserByEmail(emailAddress) {
           return;
       }
       // rows fetch
-      return data;
+      return callback(data[0].EmailAddress);
   });
 }
 
 //query rows in the table
 
-function findUserById(Id) {
-  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
-  let query = mysql.format(selectQuery,["user","ID", Id]);
+function findUserIdByEmail(emailAddress, callback) {
+  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';    
+  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
   // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
   pool.query(query,(err, data) => {
       if(err) {
@@ -374,8 +416,85 @@ function findUserById(Id) {
           return;
       }
       // rows fetch
-      return data;
+      return callback(data[0].ID);
   });
+}
+
+function findHighestId(callback) {
+	  let selectQuery = 'SELECT ?? FROM ?? ORDER BY ?? DESC LIMIT 1';    
+	  let query = mysql.format(selectQuery,["ID","user","ID"]);
+	  pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      return callback(data[0].ID);
+	  });
+	}
+
+function findPasswordById(id, callback) {
+	let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';
+	let query = mysql.format(selectQuery,["user","ID", id]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[0].Password);
+	  });
+}
+
+function populateUsersID(index, callback) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[index].ID);
+	  });
+}
+
+function populateUsersName(index, callback) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[index].Name);
+	  });
+}
+
+function populateUsersEmailAddress(index, callback) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[index].EmailAddress);
+	  });
+}
+
+function populateUsersPassword(index, callback) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[index].Password);
+	  });
 }
 
 exports = app;
