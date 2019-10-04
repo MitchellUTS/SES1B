@@ -29,7 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
     id => users.find(user => user.id === id)
   )
   
-  const port = 3000;
+  const port = 9000;
   const users = []
   
   app.set('views', path.join(__dirname, 'views'));
@@ -37,6 +37,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.set('view engine', 'ejs');
   app.use(express.urlencoded({ extended: false }))
   app.use(flash())
+  app.use(cors());
   app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -45,6 +46,10 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
+
+  app.get('/list', (req, res) => {
+    res.json(['one', 'two', 'three']);
+  });
   
   app.get('/', checkAuthenticated, (req, res) => {
     res.render('index.ejs', { name: req.user.name })
