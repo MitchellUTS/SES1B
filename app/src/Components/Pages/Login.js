@@ -41,14 +41,10 @@ const useStyles = makeStyles(theme => ({
 
 export default function SignIn() {
   const classes = useStyles();
-
+  let val = "b";
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <form action="http://localhost:9000/list" method="POST">
-        <input type="text" id="a" name="a" value = "b"/>
-        <Button type="submit">TEST</Button>
-      </form>
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
