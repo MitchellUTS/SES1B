@@ -54,6 +54,12 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('/', checkAuthenticated, (req, res) => {
     res.render('index.ejs', { name: req.user.name })
   })
+
+  app.post('/list', (req, res) => {
+    console.log(req.body);
+    //)
+    //res.redirect('list');
+  })
   
   app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs')

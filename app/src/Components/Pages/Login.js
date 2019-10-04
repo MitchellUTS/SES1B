@@ -45,6 +45,10 @@ export default function SignIn() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
+      <form action="http://localhost:9000/list" method="POST">
+        <input type="text" id="a" name="a" value = "b"/>
+        <Button type="submit">TEST</Button>
+      </form>
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
