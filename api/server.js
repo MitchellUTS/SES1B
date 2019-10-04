@@ -455,7 +455,7 @@ exports = app;
 
 async function f() {
   let results = await getAllItems();
-  console.log(results[2].sku);
+  //console.log(results[2].sku);
 }
 
 //getAllItems().then(data => {console.log("getAllItems:", data);});
