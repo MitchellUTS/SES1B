@@ -69,38 +69,31 @@ initializePassport(
   const port = 3000;
   const users = [];
   
-  /*var max;
-  findHighestId(function(result){
+  var max;
+  var tempUserId;
+  var tempUserName;
+  var tempUserEmail;
+  var tempUserPassword;
+  findHighestId(async function(result){
   	  max = result;
-  	for (let i = 1; i < max; i++) {
-  		var tempUserId;
-  		var tempUserName;
-  		var tempUserEmail;
-  		var tempUserPassword;
-  	  	populateUsersID(i, function (result){
-  	  		tempUserId = result;
-  	  		populateUsersName(i, function (result){
-  	  			tempUserName = result;
-  	  			populateUsersEmailAddress(i, function (result){
-  	  				tempUserEmail = result;
-  	  				populateUsersPassword(i, function (result){
-  	  					tempUserPassword = result;
-  	  					users.push({
-  	  	  	  				id: tempUserId,
-  	  	  	  	    		name: tempUserName,
-  	  	  	  	    		email: tempUserEmail,
-  	  	  	  	    		password: tempUserPassword
-  	  	  	  			})
-  	  	  	  			console.log(users[i]);
-  	  				});
-  	  			});
-  	  		});
-  	  	});
+  	for (let i = 0; i < max; i++) {
+  		//populateUserIdWrapper(i).then(data => tempUserId = data);
+  		tempUserId = await populateUsersID(i);
+  		
+  		tempUserName = await populateUsersName(i);
+  		
+  		tempUserEmail = await populateUsersEmailAddress(i);
+
+  		tempUserPassword = await populateUsersPassword(i);
+  		users.push({
+  			id: tempUserId,
+	  	    name: tempUserName,
+	  	    email: tempUserEmail,
+	  	    password: tempUserPassword
+  		})
+  		console.log(users[i]);
   	  }
-  });*/
-  
-  populateUsersID(1).then(data => console.log(data));
-  queryWrapper();
+  });
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -448,8 +441,8 @@ function findPasswordById(id, callback) {
 	  });
 }
 
-async function queryWrapper() {
-	console.log(await populateUsersID(1));
+async function populateUserIdWrapper(index) {
+	await populateUsersID(index);
 }
 
 function populateUsersID(index) {
@@ -468,43 +461,64 @@ function populateUsersID(index) {
 	});
 }
 
-function populateUsersName(index, callback) {
-	let selectQuery = 'SELECT * FROM ??';
-	let query = mysql.format(selectQuery,["user"]);
-	pool.query(query,(err, data) => {
-	      if(err) {
-	          console.error(err);
-	          return;
-	      }
-	      // rows fetch
-	      return callback(data[index].Name);
-	  });
+async function populateUserNameWrapper(index) {
+	return (await populateUsersName(index));
 }
 
-function populateUsersEmailAddress(index, callback) {
+function populateUsersName(index) {
+	return new Promise(function (resolve, reject) {
 	let selectQuery = 'SELECT * FROM ??';
 	let query = mysql.format(selectQuery,["user"]);
 	pool.query(query,(err, data) => {
 	      if(err) {
 	          console.error(err);
+	          reject(err);
 	          return;
 	      }
 	      // rows fetch
-	      return callback(data[index].EmailAddress);
+	      resolve(data[index].Name);
 	  });
+	});
 }
 
-function populateUsersPassword(index, callback) {
+async function populateUserEmailAddressWrapper(index) {
+	return (await populateUsersEmailAddress(index));
+}
+
+function populateUsersEmailAddress(index) {
+	return new Promise(function (resolve, reject) {
 	let selectQuery = 'SELECT * FROM ??';
 	let query = mysql.format(selectQuery,["user"]);
 	pool.query(query,(err, data) => {
 	      if(err) {
 	          console.error(err);
+	          reject(err);
 	          return;
 	      }
 	      // rows fetch
-	      return callback(data[index].Password);
+	      resolve(data[index].EmailAddress);
 	  });
+	});
+}
+
+async function populateUserPasswordWrapper(index) {
+	return (await populateUsersPassword(index));
+}
+
+function populateUsersPassword(index) {
+	return new Promise(function (resolve, reject) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+	          return;
+	      }
+	      // rows fetch
+	      resolve(data[index].Password);
+	  });
+	});
 }
 
 exports = app;
