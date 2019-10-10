@@ -4,6 +4,8 @@ import NavBar from "./Components/Layouts/NavBar";
 import Login from "./Components/Pages/Login";
 import SignUp from "./Components/Pages/SignUp";
 import Product from "./Components/Pages/Product";
+import Template from "./Components/Pages/Template";
+
 
 export default class extends Component {
   render() {
@@ -17,6 +19,7 @@ export default class extends Component {
               <Route exact path='/Login' component={Login} />
               <Route path='/SignUp' component={SignUp} />
               <Route path='/Product' component={Product} />
+              <Route path='/Template' component={Template} /> {/*Added by Mitch*/}
             </Switch>
           </div>
         </Router>

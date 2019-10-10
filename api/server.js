@@ -21,6 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
   const flash = require('express-flash')
   const session = require('express-session')
   const methodOverride = require('method-override')
+  const bodyParser = require("body-parser");
 
   var mysql = require('mysql');
 /*const pool = mysql.createPool({
@@ -49,7 +50,7 @@ const pool = mysql.createPool({
     id => users.find(user => user.id === id)
   )
   
-  const port = 3000;
+  const port = 9000;
   const users = [];
   
   var max;
@@ -76,12 +77,14 @@ const pool = mysql.createPool({
   		console.log(users[i]);
   	  }
   });
+
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
   app.set('view engine', 'ejs');
   app.use(express.urlencoded({ extended: false }))
   app.use(flash())
+  app.use(cors());
   app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -90,6 +93,12 @@ const pool = mysql.createPool({
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
+  
+  app.get('/list', (req, res) => {
+    res.json(['one', 'two', 'three']);
+  });
 
   app.get('/test', (req, res) => {
     res.render('test.ejs', {testdata: 900});
@@ -141,18 +150,43 @@ const pool = mysql.createPool({
     products = await getAllItems();
     res.render('index.ejs', { name: req.user.name, items: products })
   })
+
+  app.post('/list', (req, res) => {
+    console.log(req.body);
+    res.send("Success your POST requested contained: " + JSON.stringify(req.body));
+  })
   
+  app.post('/template', (req, res) => {
+    let string = ("Your request was successfully recieved.\n\n" + 
+                  "Sender/Referrer:      " + req.headers.referer +"\n" + 
+                  "Request Method/Type:  " + req.method + "\n" +
+                  "Destination:          " + req.headers.host + req.url + "\n\n" +
+                  "Body: " + JSON.stringify(req.body));
+    console.log(string);
+    res.send(string);
+    //res.redirect('back');
+  })
+
   app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs')
   })
   
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-  }))
+      successRedirect: '/',
+      failureRedirect: '/login',
+      failureFlash: true
+    })
+  )
+
+  app.post('/api/login', checkNotAuthenticatedAPI, (req, res, next) => {
+    passport.authenticate('local', {
+      successRedirect: req.headers.origin + '/product',
+      failureRedirect: req.headers.origin,
+      failureFlash: true
+    })(req, res, next);
+  })
   
-  app.get('/register', checkNotAuthenticated, (req, res) => {
+  app.get('/register', checkNotAuthenticatedAPI, (req, res) => {
     res.render('register.ejs')
   })
   
@@ -186,6 +220,22 @@ const pool = mysql.createPool({
       res.redirect('/register')
     }
   })
+
+  app.post('/api/register', checkNotAuthenticatedAPI, async (req, res) => {
+    try {
+      const hashedPassword = await bcrypt.hash(req.body.password, 10)
+      users.push({
+        id: Date.now().toString(),
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword
+      })
+      sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
+      res.redirect(req.headers.origin + '/login');
+    } catch {
+      res.redirect(req.headers.referer);
+    }
+  })
   
   app.delete('/logout', (req, res) => {
     req.logOut()
@@ -200,6 +250,11 @@ const pool = mysql.createPool({
     res.redirect('/')
   })
   
+  app.delete('/api/logout', (req, res) => {
+    req.logOut();
+    res.redirect('/login')
+  })
+  
   function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next()
@@ -211,6 +266,21 @@ const pool = mysql.createPool({
   function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return res.redirect('/')
+    }
+    next()
+  }
+  
+  function checkAuthenticatedAPI(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next()
+    }
+  
+    res.redirect('http:/localhost:3000/')
+  }
+  
+  function checkNotAuthenticatedAPI(req, res, next) {
+    if (req.isAuthenticated()) {
+      return res.redirect('http://localhost:3000/login')
     }
     next()
   }
