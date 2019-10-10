@@ -108,7 +108,7 @@ const pool = mysql.createPool({
     console.log(req.body.price);
     console.log(req.body.description);
     if(req.body.name.length > 0 && req.body.price.length > 0 && req.body.description.length > 0){
-      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price]});
+      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100]});
     }
     else{
       console.log("Not all fields have been filled.");
@@ -116,7 +116,7 @@ const pool = mysql.createPool({
     res.render('adding.ejs');
   });
   
-  app.all('/', checkAuthenticated, (req, res) => {
+  app.all('/', checkAuthenticated, async (req, res) => {
     //Add products in here to add to the catalogue page
     let products = [
       {
@@ -138,6 +138,7 @@ const pool = mysql.createPool({
         description: "this is a test 3 description"
       },
     ]
+    products = await getAllItems();
     res.render('index.ejs', { name: req.user.name, items: products })
   })
   
@@ -189,6 +190,14 @@ const pool = mysql.createPool({
   app.delete('/logout', (req, res) => {
     req.logOut()
     res.redirect('/login')
+  })
+
+  app.all('/delete', (req, res) => {
+    var sku = req.body.sku;
+    var name = req.body.name;
+    console.log("Deleteing item: " + name);
+    deleteItem(sku);
+    res.redirect('/')
   })
   
   function checkAuthenticated(req, res, next) {
@@ -564,15 +573,35 @@ function populateUsersPassword(index) {
 	});
 }
 
+function deleteItem(sku){
+  return new Promise(function(resolve, reject) {
+    let query = "DELETE FROM item WHERE ID = ?";
+    query = mysql.format(query, [sku]);
+    pool.query(query,(err, data) =>{
+      if(err) {
+        console.error(err);
+        reject(err);
+        return;
+      }
+      resolve(data);
+    });
+  });
+}
+
 exports = app;
 
 async function f() {
   let results = await getAllItems();
-  console.log(results[2].sku);
+  console.log(results);
 }
 
+// for(let i = 0; i < 20; i++)
+// {
+//   deleteItem(i);
+// }
+
 //getAllItems().then(data => {console.log("getAllItems:", data);});
-//f();
+f();
 //addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
 
 //console.log(findUserById(1));

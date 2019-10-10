@@ -19,6 +19,13 @@
                     <input type="hidden" name="description" value=<%= items[i].description %>>
                     <input type="submit" value="Buy">
                 </form>
+                <form action="/delete" method="POST">
+                    <input type="hidden" name="sku" value=<%= items[i].sku %>>
+                    <input type="hidden" name="price" value=<%= items[i].price %>>
+                    <input type="hidden" name="name" value=<%= items[i].name %>>
+                    <input type="hidden" name="description" value=<%= items[i].description %>>
+                    <input type="submit" value="Delete">
+                </form>
             </article>
         <% } %>
     </body>
