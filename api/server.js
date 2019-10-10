@@ -79,10 +79,19 @@ if (process.env.NODE_ENV !== 'production') {
   })
   
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-  }))
+      successRedirect: '/',
+      failureRedirect: '/login',
+      failureFlash: true
+    })
+  )
+
+  app.post('/api/login', checkNotAuthenticated, (req, res, next) => {
+    passport.authenticate('local', {
+      successRedirect: req.headers.origin + '/product',
+      failureRedirect: req.headers.origin + '/login',
+      failureFlash: true
+    })(req, res, next);
+  })
   
   app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
@@ -103,9 +112,30 @@ if (process.env.NODE_ENV !== 'production') {
       res.redirect('/register')
     }
   })
+
+  app.post('/api/register', checkNotAuthenticated, async (req, res) => {
+    try {
+      const hashedPassword = await bcrypt.hash(req.body.password, 10)
+      users.push({
+        id: Date.now().toString(),
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword
+      })
+      sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
+      res.redirect(req.headers.origin + '/login');
+    } catch {
+      res.redirect(req.headers.referer);
+    }
+  })
   
   app.delete('/logout', (req, res) => {
     req.logOut()
+    res.redirect('/login')
+  })
+  
+  app.delete('/api/logout', (req, res) => {
+    req.logOut();
     res.redirect('/login')
   })
   

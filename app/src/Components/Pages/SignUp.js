@@ -130,6 +130,23 @@ export default function SignUp() {
             </Grid>
           </Grid>
         </form>
+
+        <form action="http://localhost:9000/api/register" method="POST">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required/>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required/>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+
       </div>
     </Container>
   );
