@@ -47,20 +47,35 @@ const pool = mysql.createPool({
     passport,
     email => users.find(user => user.email === email),
     id => users.find(user => user.id === id)
-    //email => setTimeout(() => {
-    	  // call the function
-    	  // select rows
-    	  //findUserByEmail(email);
-    	//},5000),
-    //id => setTimeout(() => {
-  	  // call the function
-  	  // select rows
-  	  //findUserById(id);
-    //},5000)
   )
   
   const port = 3000;
   const users = [];
+  
+  var max;
+  var tempUserId;
+  var tempUserName;
+  var tempUserEmail;
+  var tempUserPassword;
+  findHighestId(async function(result){
+  	  max = result;
+  	for (let i = 0; i < max; i++) {
+  		tempUserId = await populateUsersID(i);
+  		
+  		tempUserName = await populateUsersName(i);
+  		
+  		tempUserEmail = await populateUsersEmailAddress(i);
+
+  		tempUserPassword = await populateUsersPassword(i);
+  		users.push({
+  			id: tempUserId,
+	  	    name: tempUserName,
+	  	    email: tempUserEmail,
+	  	    password: tempUserPassword
+  		})
+  		console.log(users[i]);
+  	  }
+  });
   
   app.set('views', path.join(__dirname, 'views'));
   app.set('view-engine', 'ejs')
@@ -126,7 +141,10 @@ const pool = mysql.createPool({
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
-      var idVar = Date.now().toString();
+      var idVar;
+      findHighestId(function(result){
+    	  idVar = result;
+      });
       var nameVar = req.body.name;
       var emailVar = req.body.email;
       var passwordVar = hashedPassword;
@@ -138,12 +156,12 @@ const pool = mysql.createPool({
       })
       
       //Insert query call
-      /*setTimeout(() => {
+      setTimeout(() => {
       //call the function
     	registerUserAddRow({
-    	  "fieldValue": [idVar,nameVar,emailVar,passwordVar]
+    	  "fieldValue": [idVar+1,nameVar,emailVar,passwordVar]
     	});
-      },5000);*/
+      },5000);
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
       res.redirect('/login')
     } catch {
@@ -354,34 +372,59 @@ function updateUserPassword(data) {
 
 //query rows in the table
 
-function findUserByEmail(emailAddress) {
-  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
-  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
-  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
-  pool.query(query,(err, data) => {
-      if(err) {
-          console.error(err);
-          return;
-      }
-      // rows fetch
-      return data;
-  });
-}
+function findUserByEmail(emailAddress, callback) {
+	  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';    
+	  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
+	  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+	  pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[0].EmailAddress);
+	  });
+	}
 
 //query rows in the table
 
-function findUserById(Id) {
-  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ?';    
-  let query = mysql.format(selectQuery,["user","ID", Id]);
-  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
-  pool.query(query,(err, data) => {
-      if(err) {
-          console.error(err);
-          return;
-      }
-      // rows fetch
-      return data;
-  });
+function findUserIdByEmail(emailAddress, callback) {
+	  let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';    
+	  let query = mysql.format(selectQuery,["user","EmailAddress", emailAddress]);
+	  // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+	  pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[0].ID);
+	  });
+	}
+
+function findHighestId(callback) {
+	  let selectQuery = 'SELECT ?? FROM ?? ORDER BY ?? DESC LIMIT 1';    
+	  let query = mysql.format(selectQuery,["ID","user","ID"]);
+	  pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      return callback(data[0].ID);
+	  });
+	}
+
+function findPasswordById(id, callback) {
+	let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';
+	let query = mysql.format(selectQuery,["user","ID", id]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          return;
+	      }
+	      // rows fetch
+	      return callback(data[0].Password);
+	  });
 }
 
 function getAllItems() {
@@ -422,6 +465,86 @@ function addItemToDatabase(data) {
       // rows added
       console.log(response.insertId);
   });
+}
+
+async function populateUserIdWrapper(index) {
+	await populateUsersID(index);
+}
+
+function populateUsersID(index) {
+	return new Promise(function (resolve, reject) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+	          return;
+	      }
+	      // rows fetch
+	      resolve(data[index].ID);
+	  });
+	});
+}
+
+async function populateUserNameWrapper(index) {
+	return (await populateUsersName(index));
+}
+
+function populateUsersName(index) {
+	return new Promise(function (resolve, reject) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+	          return;
+	      }
+	      // rows fetch
+	      resolve(data[index].Name);
+	  });
+	});
+}
+
+async function populateUserEmailAddressWrapper(index) {
+	return (await populateUsersEmailAddress(index));
+}
+
+function populateUsersEmailAddress(index) {
+	return new Promise(function (resolve, reject) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+	          return;
+	      }
+	      // rows fetch
+	      resolve(data[index].EmailAddress);
+	  });
+	});
+}
+
+async function populateUserPasswordWrapper(index) {
+	return (await populateUsersPassword(index));
+}
+
+function populateUsersPassword(index) {
+	return new Promise(function (resolve, reject) {
+	let selectQuery = 'SELECT * FROM ??';
+	let query = mysql.format(selectQuery,["user"]);
+	pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+	          return;
+	      }
+	      // rows fetch
+	      resolve(data[index].Password);
+	  });
+	});
 }
 
 exports = app;
