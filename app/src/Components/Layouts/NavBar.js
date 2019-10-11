@@ -34,6 +34,9 @@ export default function ButtonAppBar() {
                         Lavender
                     </Typography>
                     <Link to="/Login"><Button type="submit">Login</Button></Link>
+                    <form action="http://localhost:9000/api/logout" method="POST">
+                        <button type="submit">Log-out</button>
+                    </form>
                 </Toolbar>
             </AppBar>
         </div>

@@ -74,7 +74,7 @@ const pool = mysql.createPool({
 	  	    email: tempUserEmail,
 	  	    password: tempUserPassword
   		})
-  		console.log(users[i]);
+  		//console.log(users[i]);
   	  }
   });
 
@@ -224,12 +224,33 @@ const pool = mysql.createPool({
   app.post('/api/register', checkNotAuthenticatedAPI, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
+      var idVar;
+      findHighestId(function(result){
+    	  idVar = result;
+      });
+      var nameVar = req.body.name;
+      var emailVar = req.body.email;
+      var passwordVar = hashedPassword;
       users.push({
-        id: Date.now().toString(),
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword
+        id: idVar,
+        name: nameVar,
+        email: emailVar,
+        password: passwordVar
       })
+      // console.log(JSON.stringify({
+      //   id: idVar,
+      //   name: nameVar,
+      //   email: emailVar,
+      //   password: passwordVar
+      // }));
+      
+      //Insert query call
+      setTimeout(() => {
+      //call the function
+    	registerUserAddRow({
+    	  "fieldValue": [idVar+1,nameVar,emailVar,passwordVar]
+    	});
+      },5000);
       sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
       res.redirect(req.headers.origin + '/login');
     } catch {
@@ -250,9 +271,9 @@ const pool = mysql.createPool({
     res.redirect('/')
   })
   
-  app.delete('/api/logout', (req, res) => {
+  app.post('/api/logout', (req, res) => {
     req.logOut();
-    res.redirect('/login')
+    res.redirect(req.headers.origin);
   })
   
   function checkAuthenticated(req, res, next) {
@@ -275,12 +296,12 @@ const pool = mysql.createPool({
       return next()
     }
   
-    res.redirect('http:/localhost:3000/')
+    res.redirect('http://localhost:3000/login')
   }
   
   function checkNotAuthenticatedAPI(req, res, next) {
     if (req.isAuthenticated()) {
-      return res.redirect('http://localhost:3000/login')
+      return res.redirect('http://localhost:3000/product')
     }
     next()
   }
@@ -671,7 +692,7 @@ async function f() {
 // }
 
 //getAllItems().then(data => {console.log("getAllItems:", data);});
-f();
+//f();
 //addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
 
 //console.log(findUserById(1));

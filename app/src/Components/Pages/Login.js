@@ -52,6 +52,19 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
+        
+        <form action="http://localhost:9000/api/login" method="POST">
+          <div>
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required/>
+          </div>
+          <div>
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required/>
+          </div>
+          <button type="submit">Login</button>
+        </form>
+
         <form className={classes.form} noValidate>
           <TextField
             variant="outlined"
@@ -101,19 +114,6 @@ export default function SignIn() {
             </Grid>
           </Grid>
         </form>
-        <form action="http://localhost:9000/api/login" method="POST">
-          <div>
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" required/>
-          </div>
-          <div>
-              <label for="password">Password</label>
-              <input type="password" id="password" name="password" required/>
-          </div>
-          <button type="submit">Login</button>
-        </form>
-
-
       </div>
     </Container>
   );
