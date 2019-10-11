@@ -85,15 +85,15 @@ if (process.env.NODE_ENV !== 'production') {
     })
   )
 
-  app.post('/api/login', checkNotAuthenticated, (req, res, next) => {
+  app.post('/api/login', checkNotAuthenticatedAPI, (req, res, next) => {
     passport.authenticate('local', {
       successRedirect: req.headers.origin + '/product',
-      failureRedirect: req.headers.origin + '/login',
+      failureRedirect: req.headers.origin,
       failureFlash: true
     })(req, res, next);
   })
   
-  app.get('/register', checkNotAuthenticated, (req, res) => {
+  app.get('/register', checkNotAuthenticatedAPI, (req, res) => {
     res.render('register.ejs')
   })
   
@@ -113,7 +113,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
   })
 
-  app.post('/api/register', checkNotAuthenticated, async (req, res) => {
+  app.post('/api/register', checkNotAuthenticatedAPI, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
       users.push({
@@ -150,6 +150,21 @@ if (process.env.NODE_ENV !== 'production') {
   function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return res.redirect('/')
+    }
+    next()
+  }
+  
+  function checkAuthenticatedAPI(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next()
+    }
+  
+    res.redirect('http:/localhost:3000/')
+  }
+  
+  function checkNotAuthenticatedAPI(req, res, next) {
+    if (req.isAuthenticated()) {
+      return res.redirect('http://localhost:3000/login')
     }
     next()
   }
