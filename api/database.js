@@ -1,4 +1,4 @@
-/*if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
   }
   
@@ -46,7 +46,7 @@ const pool = mysql.createPool({
   const initializePassport = require('./passport-config')
 
   
-  var max;
+  /*var max;
   var tempUserId;
   var tempUserName;
   var tempUserEmail;
@@ -201,46 +201,6 @@ function findPasswordById(id, callback) {
     });
 }
 
-function getAllItems() {
-  return new Promise(function(resolve, reject) {
-    let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
-    let query = mysql.format(selectQuery,["item"]);
-    // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
-    pool.query(query,(err, data) => {
-        if(err) {
-            console.error(err);
-            reject(err);
-            return;
-        }
-        // rows fetch
-        //console.log(data);
-        resolve(data);
-    });
-  });
-}
-
-function addItemToDatabase(data) {
-
-  var numberOfFields = data.fieldValue.length;
-  
-  let insertQuery = 'INSERT INTO item (Name, Description, CostPrice, RetailPrice, Quantity, SellerID, ImagePath) VALUES (?,?,?,?,?,?,?)'
-  
-  var query;
-  
-  query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
-  
-  //console.log(query);
-  
-  pool.query(query,(err, response) => {
-      if(err) {
-          console.error(err);
-          return;
-      }
-      // rows added
-      console.log(response.insertId);
-  });
-}
-
 async function populateUserIdWrapper(index) {
 	await populateUsersID(index);
 }
@@ -321,25 +281,65 @@ function populateUsersPassword(index) {
 	});
 }
 
-function deleteItem(sku){
-  return new Promise(function(resolve, reject) {
-    let query = "DELETE FROM item WHERE ID = ?";
-    query = mysql.format(query, [sku]);
-    pool.query(query,(err, data) =>{
-      if(err) {
-        console.error(err);
-        reject(err);
-        return;
-      }
-      resolve(data);
-    });
-  });
-}
-
 async function f() {
   let results = await getAllItems();
   console.log(results);
 }*/
+
+function addItemToDatabase(data) {
+
+    var numberOfFields = data.fieldValue.length;
+
+    let insertQuery = 'INSERT INTO item (Name, Description, CostPrice, RetailPrice, Quantity, SellerID, ImagePath) VALUES (?,?,?,?,?,?,?)'
+
+    var query;
+
+    query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
+
+    //console.log(query);
+
+    pool.query(query,(err, response) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        // rows added
+        console.log(response.insertId);
+    });
+}
+
+function deleteItem(sku){
+    return new Promise(function(resolve, reject) {
+        let query = "DELETE FROM item WHERE ID = ?";
+        query = mysql.format(query, [sku]);
+        pool.query(query,(err, data) =>{
+        if(err) {
+            console.error(err);
+            reject(err);
+            return;
+        }
+        resolve(data);
+        });
+    });
+}
+
+function getAllItems() {
+    return new Promise(function(resolve, reject) {
+      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
+      let query = mysql.format(selectQuery,["item"]);
+      // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
+      pool.query(query,(err, data) => {
+          if(err) {
+              console.error(err);
+              reject(err);
+              return;
+          }
+          // rows fetch
+          //console.log(data);
+          resolve(data);
+      });
+    });
+}
 
 function sum(a,b) {
     return a+b;
@@ -352,6 +352,9 @@ function multiply(a,b) {
 module.exports = function() { 
     this.sum = sum;
     this.multiply = multiply;
+    this.addItemToDatabase = addItemToDatabase;
+    this.deleteItem = deleteItem;
+    this.getAllItems = getAllItems;
 }
 
 // for(let i = 0; i < 20; i++)

@@ -238,12 +238,6 @@ const pool = mysql.createPool({
         email: emailVar,
         password: passwordVar
       })
-      // console.log(JSON.stringify({
-      //   id: idVar,
-      //   name: nameVar,
-      //   email: emailVar,
-      //   password: passwordVar
-      // }));
 
       //Insert query call
       setTimeout(() => {
@@ -567,28 +561,6 @@ function getAllItems() {
   });
 }
 
-function addItemToDatabase(data) {
-
-  var numberOfFields = data.fieldValue.length;
-  
-  let insertQuery = 'INSERT INTO item (Name, Description, CostPrice, RetailPrice, Quantity, SellerID, ImagePath) VALUES (?,?,?,?,?,?,?)'
-  
-  var query;
-  
-  query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
-  
-  //console.log(query);
-  
-  pool.query(query,(err, response) => {
-      if(err) {
-          console.error(err);
-          return;
-      }
-      // rows added
-      console.log(response.insertId);
-  });
-}
-
 async function populateUserIdWrapper(index) {
 	await populateUsersID(index);
 }
@@ -669,21 +641,6 @@ function populateUsersPassword(index) {
 	});
 }
 
-function deleteItem(sku){
-  return new Promise(function(resolve, reject) {
-    let query = "DELETE FROM item WHERE ID = ?";
-    query = mysql.format(query, [sku]);
-    pool.query(query,(err, data) =>{
-      if(err) {
-        console.error(err);
-        reject(err);
-        return;
-      }
-      resolve(data);
-    });
-  });
-}
-
 exports = app;
 
 async function f() {
@@ -691,7 +648,7 @@ async function f() {
   console.log(results);
 }
 
-console.log("Sum:", sum(1,2) + "\nMultliply:", multiply(2, 4));
+//console.log("Sum:", sum(1,2) + "\nMultliply:", multiply(2, 4));
 
 // for(let i = 0; i < 20; i++)
 // {
