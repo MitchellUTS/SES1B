@@ -39,8 +39,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+function request() {
+  let remote = 'http://localhost:9000';
+
+  //Specific the correct page, in this case it is /template
+  let destination = remote + '/api/load/users';
+  let headers = {};
+  
+  //Add your data to send back here
+  let data = {word: "bird", otherField: 0, val: true};
+
+  fetch(destination, { method: 'POST' });
+}
+
 export default function SignIn() {
   const classes = useStyles();
+  request();
   let val = "b";
   return (
     <Container component="main" maxWidth="xs">
@@ -52,7 +66,7 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        
+
         <form action="http://localhost:9000/api/login" method="POST">
           <div>
               <label for="email">Email</label>

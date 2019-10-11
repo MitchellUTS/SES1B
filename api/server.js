@@ -22,6 +22,7 @@ if (process.env.NODE_ENV !== 'production') {
   const session = require('express-session')
   const methodOverride = require('method-override')
   const bodyParser = require("body-parser");
+  require('./database.js')();
 
   var mysql = require('mysql');
 /*const pool = mysql.createPool({
@@ -243,7 +244,7 @@ const pool = mysql.createPool({
       //   email: emailVar,
       //   password: passwordVar
       // }));
-      
+
       //Insert query call
       setTimeout(() => {
       //call the function
@@ -445,6 +446,10 @@ function handle_database(req,res) {
 
 app.get("/",function(req,res){-
      handle_database(req,res);
+});
+
+app.post("/api/load/users", function(req,res){
+  handle_database(req,res);
 });
 
 //add rows in the table
@@ -685,6 +690,8 @@ async function f() {
   let results = await getAllItems();
   console.log(results);
 }
+
+console.log("Sum:", sum(1,2) + "\nMultliply:", multiply(2, 4));
 
 // for(let i = 0; i < 20; i++)
 // {
