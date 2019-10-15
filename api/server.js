@@ -23,6 +23,7 @@ if (process.env.NODE_ENV !== 'production') {
   const methodOverride = require('method-override')
   const bodyParser = require("body-parser");
   require('./database.js')();
+  require('./email.js')();
 
   var mysql = require('mysql');
 /*const pool = mysql.createPool({
@@ -51,7 +52,7 @@ const pool = mysql.createPool({
     id => users.find(user => user.id === id)
   )
   
-  const port = 9000;
+  const port = 80;
   const users = [];
   
   var max;
@@ -60,7 +61,8 @@ const pool = mysql.createPool({
   var tempUserEmail;
   var tempUserPassword;
   findHighestId(async function(result){
-  	  max = result;
+      max = result;
+
   	for (let i = 0; i < max; i++) {
   		tempUserId = await populateUsersID(i);
   		
@@ -96,67 +98,39 @@ const pool = mysql.createPool({
   app.use(methodOverride('_method'))
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  
-  app.get('/list', (req, res) => {
-    res.json(['one', 'two', 'three']);
-  });
 
-  app.get('/test', (req, res) => {
-    res.render('test.ejs', {testdata: 900});
+  app.get('/products/add', checkAuthenticated, (req, res) => {
+    res.render('add.ejs', {message: ""});
   });
   
-  app.post('/test', (req, res) => {
-    console.log(req.body);
-  });
-
-  app.get('/adding', (req, res) => {
-    res.render('adding.ejs');
-  });
-  
-  app.post('/adding', (req, res) => {
-    console.log(req.body.name);
-    console.log(req.body.price);
-    console.log(req.body.description);
+  app.post('/products/add', checkAuthenticated, (req, res) => {
+    //console.log(req.body.name);
+    //console.log(req.body.price);
+    //console.log(req.body.description);
+    let json = {message: "Failed to the product, please fill in all the fields."}
     if(req.body.name.length > 0 && req.body.price.length > 0 && req.body.description.length > 0){
-      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100]});
+      json = {message: ("You successfully added: " + req.body.name + " to the catalogue." )};
+      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100, req.user.id]});
     }
     else{
       console.log("Not all fields have been filled.");
     }
-    res.render('adding.ejs');
+    res.render('add.ejs', json);
   });
-  
-  app.all('/', checkAuthenticated, async (req, res) => {
+
+  app.all('/products', checkAuthenticated, async (req, res) => {
     //Add products in here to add to the catalogue page
-    let products = [
-      {
-        name: "intel i5",
-        sku: '001',
-        price: '299.00',
-        description: "intel dual core i5 8th gen processor"
-      },
-      {
-        name: "test 2",
-        sku: '002',
-        price: '95.00',
-        description: "this is a test description"
-      },
-      {
-        name: "test 3",
-        sku: '003',
-        price: '10.00',
-        description: "this is a test 3 description"
-      },
-    ]
-    products = await getAllItems();
-    res.render('index.ejs', { name: req.user.name, items: products })
+    let products = await getAllItems();
+    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products })
+  })
+  
+  app.all('/', checkAuthenticated, (req, res) => {
+    //Add products in here to add to the catalogue page
+    /*let products = await getAllItems();
+    res.render('index.ejs', { name: req.user.name, items: products })*/
+    res.redirect("/products");
   })
 
-  app.post('/list', (req, res) => {
-    console.log(req.body);
-    res.send("Success your POST requested contained: " + JSON.stringify(req.body));
-  })
-  
   app.post('/template', (req, res) => {
     let string = ("Your request was successfully recieved.\n\n" + 
                   "Sender/Referrer:      " + req.headers.referer +"\n" + 
@@ -179,15 +153,7 @@ const pool = mysql.createPool({
     })
   )
 
-  app.post('/api/login', checkNotAuthenticatedAPI, (req, res, next) => {
-    passport.authenticate('local', {
-      successRedirect: req.headers.origin + '/product',
-      failureRedirect: req.headers.origin,
-      failureFlash: true
-    })(req, res, next);
-  })
-  
-  app.get('/register', checkNotAuthenticatedAPI, (req, res) => {
+  app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
   })
   
@@ -212,63 +178,77 @@ const pool = mysql.createPool({
       setTimeout(() => {
       //call the function
     	registerUserAddRow({
-    	  "fieldValue": [idVar+1,nameVar,emailVar,passwordVar]
+    	  "fieldValue": [nameVar,emailVar,passwordVar]
     	});
       },5000);
-      sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
+      sendVerificationEmail(req.body.email, req.body.name);
       res.redirect('/login')
     } catch {
       res.redirect('/register')
     }
   })
 
-  app.post('/api/register', checkNotAuthenticatedAPI, async (req, res) => {
-    try {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10)
-      var idVar;
-      findHighestId(function(result){
-    	  idVar = result;
-      });
-      var nameVar = req.body.name;
-      var emailVar = req.body.email;
-      var passwordVar = hashedPassword;
-      users.push({
-        id: idVar,
-        name: nameVar,
-        email: emailVar,
-        password: passwordVar
-      })
 
+  app.get('/password/change', checkAuthenticated, (req, res) => {
+    res.render('passwordchange.ejs', {message: ""});
+  })
+  
+  app.post('/password/change', checkAuthenticated, async (req, res) => {
+    try {
+
+      let password = req.body.password;
+      
+      let hashedPassword = await bcrypt.hash(password, 10);
+      let user = users.find(user => user.email === req.user.email);
+
+      user.password = hashedPassword;
       //Insert query call
       setTimeout(() => {
-      //call the function
-    	registerUserAddRow({
-    	  "fieldValue": [idVar+1,nameVar,emailVar,passwordVar]
-    	});
+        //call the function
+        updateUserPassword({Password: user.password, EmailAddress: user.email});
       },5000);
-      sendEmail(req.body.email, 'Module Email', 'yo').catch(console.error);
-      res.redirect(req.headers.origin + '/login');
+      sendPasswordChangeEmail(user.email, user.name, req.body.password);
+      res.render('passwordchange.ejs', {message: "Successfully changed your password."});
     } catch {
-      res.redirect(req.headers.referer);
+      res.render('passwordchange.ejs', {message: "Unable to change your password."});
+    }
+  })
+
+  app.get('/password/reset', checkNotAuthenticated, (req, res) => {
+    res.render('passwordreset.ejs', {message: ""});
+  })
+  
+  app.post('/password/reset', checkNotAuthenticated, async (req, res) => {
+    try {
+      let password = generatePassword(6);
+      
+      let hashedPassword = await bcrypt.hash(password, 10);
+      let user = users.find(user => user.email === req.body.email);
+
+      user.password = hashedPassword;
+      //Insert query call
+      setTimeout(() => {
+        //call the function
+        updateUserPassword({Password: user.password, EmailAddress: user.email});
+      },5000);
+      sendPasswordResetEmail(user.email, user.name, password);
+      res.render('passwordreset.ejs', {message: ("Successfully reset the password of: " + user.email)});
+    } catch {
+      res.render('passwordreset.ejs', {message: ("Unable to reset the password of: " + req.body.email)});
     }
   })
   
-  app.delete('/logout', (req, res) => {
-    req.logOut()
-    res.redirect('/login')
+  app.all('/logout', checkAuthenticated, (req, res) => {
+    req.logOut();
+    res.redirect('/login');
   })
 
-  app.all('/delete', (req, res) => {
-    var sku = req.body.sku;
-    var name = req.body.name;
+  app.post('/delete', checkAuthenticated, (req, res) => {
+    let sku = req.body.sku;
+    let name = req.body.name;
     console.log("Deleteing item: " + name);
     deleteItem(sku);
-    res.redirect('/')
-  })
-  
-  app.post('/api/logout', (req, res) => {
-    req.logOut();
-    res.redirect(req.headers.origin);
+    res.redirect('/products');
   })
   
   function checkAuthenticated(req, res, next) {
@@ -286,28 +266,13 @@ const pool = mysql.createPool({
     next()
   }
   
-  function checkAuthenticatedAPI(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next()
-    }
-  
-    res.redirect('http://localhost:3000/login')
-  }
-  
-  function checkNotAuthenticatedAPI(req, res, next) {
-    if (req.isAuthenticated()) {
-      return res.redirect('http://localhost:3000/product')
-    }
-    next()
-  }
-
 paypal.configure({
   'mode': 'sandbox', //sandbox or live
   'client_id': 'AYrqSddTaoMoT0YNT_g45A1D03qeu37-NEUS2CyIx6ZTqxi4nFnsScO7sagv63vr1xVLpjEL-EiV0_OX',
   'client_secret': 'EBLPCMU4LF5SzH5rUEZkYT3tZBSyL5b3eUFwvjClSJTA8HzKKJTSKguRBlKkNphMbDjIueMeLbepNeSa'
 });
 
-app.post('/pay', (req, res) => {
+app.post('/pay', checkAuthenticated, (req, res) => {
 
   var price = req.body.price;
   var sku = req.body.sku;
@@ -321,15 +286,15 @@ app.post('/pay', (req, res) => {
       "payment_method": "paypal"
     },
     "redirect_urls": {
-      "return_url": "http://localhost:3000/success",
-      "cancel_url": "http://localhost:3000/cancel"
+      "return_url": "http://localhost:" + port + "/success",
+      "cancel_url": "http://localhost:" + port + "/cancel"
     },
     "transactions": [{
       "item_list": {
         "items": [{
           "name": name,
           "sku": sku,
-          "price": '0.00',
+          "price": price,
           "currency": "AUD",
           "quantity": 1
         }]
@@ -382,7 +347,9 @@ app.post('/pay', (req, res) => {
   });
 });
 
-app.get('/cancel', (req, res) => res.send('Cancelled'));
+app.get('/cancel', checkAuthenticated, function (req, res) {
+  res.render('cancel.ejs');
+});
   
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -400,7 +367,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-async function sendEmail(recipients, subject, body) {
+/*async function sendEmail(recipients, subject, body) {
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -421,11 +388,7 @@ async function sendEmail(recipients, subject, body) {
     });
 
     console.log('Message sent to: ' + recipients);
-}
-
-function generatePassword(length) {
-  return Math.random().toString(36).replace(/[^a-z0-9]+/g, '').substr(2, length);
-}
+}*/
 
 function handle_database(req,res) {
     // connection will be acquired automatically
@@ -438,25 +401,17 @@ function handle_database(req,res) {
     });
 }
 
-app.get("/",function(req,res){-
-     handle_database(req,res);
-});
-
-app.post("/api/load/users", function(req,res){
-  handle_database(req,res);
-});
-
 //add rows in the table
 
 function registerUserAddRow(data) {
 
 var numberOfFields = data.fieldValue.length;
 
-let insertQuery = 'INSERT INTO ?? (??,??,??,??) VALUES (?,?,?,?)'
+let insertQuery = 'INSERT INTO ?? (??,??,??) VALUES (?,?,?)'
 
 var query;
 
-query = mysql.format(insertQuery,["user","ID","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2],data.fieldValue[3]]);
+query = mysql.format(insertQuery,["user","Name","EmailAddress","Password",data.fieldValue[0],data.fieldValue[1],data.fieldValue[2]]);
 
 console.log(query);
 
@@ -468,22 +423,6 @@ pool.query(query,(err, response) => {
     // rows added
     console.log(response.insertId);
 });
-}
-
-//update rows
-
-function updateUserPassword(data) {
-  let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
-  let query = mysql.format(updateQuery,["user","Password",data.Password,"EmailAddress",data.EmailAddress]);
-  // query = UPDATE `user` SET `EmailAddress`='12875822@student.uts.edu.au' WHERE `Name`='Matt'
-  pool.query(query,(err, response) => {
-      if(err) {
-          console.error(err);
-          return;
-      }
-      // rows updated
-      console.log(response.affectedRows);
-  });
 }
 
 //query rows in the table
@@ -520,7 +459,7 @@ function findUserIdByEmail(emailAddress, callback) {
 
 function findHighestId(callback) {
 	  let selectQuery = 'SELECT ?? FROM ?? ORDER BY ?? DESC LIMIT 1';    
-	  let query = mysql.format(selectQuery,["ID","user","ID"]);
+    let query = mysql.format(selectQuery,["ID","user","ID"]);
 	  pool.query(query,(err, data) => {
 	      if(err) {
 	          console.error(err);
@@ -541,24 +480,6 @@ function findPasswordById(id, callback) {
 	      // rows fetch
 	      return callback(data[0].Password);
 	  });
-}
-
-function getAllItems() {
-  return new Promise(function(resolve, reject) {
-    let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
-    let query = mysql.format(selectQuery,["item"]);
-    // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
-    pool.query(query,(err, data) => {
-        if(err) {
-            console.error(err);
-            reject(err);
-            return;
-        }
-        // rows fetch
-        //console.log(data);
-        resolve(data);
-    });
-  });
 }
 
 async function populateUserIdWrapper(index) {
@@ -643,24 +564,7 @@ function populateUsersPassword(index) {
 
 exports = app;
 
-async function f() {
-  let results = await getAllItems();
-  console.log(results);
-}
-
-//console.log("Sum:", sum(1,2) + "\nMultliply:", multiply(2, 4));
-
-// for(let i = 0; i < 20; i++)
-// {
-//   deleteItem(i);
-// }
-
-//getAllItems().then(data => {console.log("getAllItems:", data);});
-//f();
-//addItemToDatabase({'fieldValue': ["testing", "its a test product", 101.00, 25]});
-
-//console.log(findUserById(1));
-
-//console.log("Random Password:", generatePassword(10));
+//sendVerificationEmail("mitch@leenet.net.au", "Mitchell Lee");
+//sendPasswordResetEmail("mitch@leenet.net.au", "Mitchell Lee", "12NewPassword34");
 
 app.listen(port, () => console.log("Server Started. \nOpen localhost:" + port + " in your browser to view the page.\nListening on Port: " + port + "\nPress Ctrl + C to stop the server.\n"));

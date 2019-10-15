@@ -4,12 +4,16 @@
         <meta charset="UTF-8">
         <meta name="viewport"
         content="ie=edge">
-        <title>This page is for testing</title>
+        <title>Add a Product</title>
     </head>
     <body>
+        <% if (!(message === "")) { %>
+            <%= message %>
+        <% } %>
+    
         <h1>Add a product.</h1>
 
-        <form action="/adding" method="POST">
+        <form action="/products/add" method="POST">
             <div>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name">
@@ -25,7 +29,7 @@
             <button type="submit">Add</button>
         </form>
 
-        <form action="/" method="POST">
+        <form action="/products">
             <input type="submit" value="Return">
         </form>
 
