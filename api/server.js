@@ -120,8 +120,10 @@ const pool = mysql.createPool({
 
   app.all('/products', checkAuthenticated, async (req, res) => {
     //Add products in here to add to the catalogue page
+    let sellerCount = await doesSellerExist({ID: req.user.id});
+    let isSeller = sellerCount > 0;
     let products = await getAllItems();
-    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products })
+    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller })
   })
   
   app.all('/', checkAuthenticated, (req, res) => {
@@ -159,10 +161,11 @@ const pool = mysql.createPool({
   
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
+      let isSeller = typeof req.body.seller !== 'undefined';
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
       var idVar;
       findHighestId(function(result){
-    	  idVar = result;
+    	  idVar = result + 1;
       });
       var nameVar = req.body.name;
       var emailVar = req.body.email;
@@ -181,6 +184,14 @@ const pool = mysql.createPool({
     	  "fieldValue": [nameVar,emailVar,passwordVar]
     	});
       },5000);
+
+      if (isSeller) {
+        setTimeout(() => {
+          //call the function
+          addSellerToDatabase({ ID: idVar, sellerName: (nameVar +"'s Store") });
+        },5000);
+      }
+
       sendVerificationEmail(req.body.email, req.body.name);
       res.redirect('/login')
     } catch {
@@ -458,14 +469,14 @@ function findUserIdByEmail(emailAddress, callback) {
 	}
 
 function findHighestId(callback) {
-	  let selectQuery = 'SELECT ?? FROM ?? ORDER BY ?? DESC LIMIT 1';    
-    let query = mysql.format(selectQuery,["ID","user","ID"]);
+	  let selectQuery = 'SELECT count(*) as ? FROM ??';    
+    let query = mysql.format(selectQuery,["temp","user"]);
 	  pool.query(query,(err, data) => {
 	      if(err) {
 	          console.error(err);
 	          return;
-	      }
-	      return callback(data[0].ID);
+        }
+	      return callback(data[0].temp);
 	  });
 	}
 
