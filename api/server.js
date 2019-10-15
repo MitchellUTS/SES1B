@@ -25,6 +25,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('./database.js')();
   require('./email.js')();
 
+  var amount;
   var mysql = require('mysql');
 /*const pool = mysql.createPool({
 	connectionLimit : 100,
@@ -302,7 +303,11 @@ app.post('/pay', checkAuthenticated, (req, res) => {
   var sku = req.body.sku;
   var name = req.body.name;
   var description = req.body.description;
-  console.log(req.body);
+
+
+  //console.log(req.body);
+
+  amount = {"currency": "AUD", "total": price };
 
   const create_payment_json = {
     "intent": "sale",
@@ -323,10 +328,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
           "quantity": 1
         }]
       },
-      "amount": {
-        "currency": "AUD",
-        "total": price
-      },
+      "amount": amount,
         "description": description
     }]
   };
@@ -353,10 +355,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
     const execute_payment_json = {
     "payer_id": payerId,
     "transactions": [{
-        "amount": {
-            "currency": "AUD",
-            "total": "299.00"
-        }
+        "amount": amount
     }]
   };
   
@@ -364,10 +363,17 @@ app.post('/pay', checkAuthenticated, (req, res) => {
     if (error) {
         console.log(error.response);
         res.render('error.ejs');
-        throw error;
+        //throw error;
     } else {
-        console.log(JSON.stringify(payment));
-        res.render('success', { payerId, paymentId, payment});
+        //console.log(payment.transactions);
+        let items = payment.transactions[0].item_list.items;
+        if (payment.state === "approved") {
+          for (let i = 0; i < items.length; i++)  {
+              //addTransactionToDatabase({UserID: req.user.id, ItemID: items[i].sku});
+          }
+        }
+        
+        res.render('success', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total});
     }
   });
 });
