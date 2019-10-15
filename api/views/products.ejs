@@ -31,19 +31,22 @@
                 <% } %>
             </article>
         <% } %>
+        
+        <br/>
+        <% if(isSeller) { %>
+            <h3>Add an Item to the Catalogue:</h3>
+            <form action="/products/add" method="GET">
+                <input type="submit" value="Add Item">
+            </form>
+            <% } %>
+            
+            <form action="/password/change">
+                <button type="submit">Change Password</button>
+            </form>
+            
+            <form action="/logout">
+                <button type="submit">Logout</button>
+            </form>
     </body>
-
-    <h3>Add an Item to the Catalogue:</h3>
-    <form action="/products/add" method="GET">
-        <input type="submit" value="Add Item">
-    </form>
-
-    <form action="/password/change">
-        <button type="submit">Change Password</button>
-    </form>
-
-    <form action="/logout">
-        <button type="submit">Logout</button>
-    </form>
-
+            
 </html>

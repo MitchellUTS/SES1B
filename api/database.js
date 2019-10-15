@@ -308,6 +308,24 @@ function addItemToDatabase(data) {
     });
 }
 
+function addSellerToDatabase(data) {
+
+    let insertQuery = 'INSERT INTO seller (UserID, SellerName) VALUES (?,?)'
+
+    var query = mysql.format(insertQuery, [data.ID, data.sellerName]);
+
+    console.log(query);
+
+    pool.query(query,(err, response) => {
+        if(err) {
+            console.error(err);
+            return;
+        }
+        // rows added
+        console.log(response.insertId);
+    });
+}
+
 function deleteItem(sku){
     return new Promise(function(resolve, reject) {
         let query = "DELETE FROM item WHERE ID = ?";
@@ -359,10 +377,47 @@ function updateUserPassword(data) {
     });
 }
 
+function doesSellerExist(data) {
+    return new Promise(function(resolve, reject) {
+        let insertQuery = 'SELECT COUNT(*) as ? FROM seller WHERE UserID = ?'
+        let query = mysql.format(insertQuery, ["temp", data.ID]);
+
+        pool.query(query,(err, data) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows added
+            resolve(data[0].temp);
+        });
+    });
+}
+
+function countUsersWithEmail(data) {
+    return new Promise(function(resolve, reject) {
+        let insertQuery = 'SELECT COUNT(EmailAddress) as ? FROM user WHERE EmailAddress = ?'
+        let query = mysql.format(insertQuery, ["count", data.Email]);
+
+        pool.query(query,(err, data) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows added
+            resolve(data[0].count);
+        });
+    });
+}
+
 module.exports = function() {
     this.addItemToDatabase = addItemToDatabase;
     this.deleteItem = deleteItem;
     this.getAllItems = getAllItems;
+    this.addSellerToDatabase = addSellerToDatabase;
+    this.doesSellerExist = doesSellerExist;
+    this.countUsersWithEmail = countUsersWithEmail;
     this.updateUserPassword = updateUserPassword;
 }
 
