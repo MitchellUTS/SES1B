@@ -294,8 +294,11 @@ function deleteItem(sku){
 
 function getAllItems() {
     return new Promise(function(resolve, reject) {
-      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' FROM ??";    
-      let query = mysql.format(selectQuery,["item"]);
+      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' ";
+      selectQuery += "FROM ?? as it LEFT JOIN ?? as tr ON it.ID = tr.ItemID ";
+      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID ";
+      selectQuery += "ORDER BY COUNT(it.ID) DESC";
+      let query = mysql.format(selectQuery,["item", "transaction"]);
       // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
       pool.query(query,(err, data) => {
           if(err) {
@@ -312,9 +315,13 @@ function getAllItems() {
 
 function getItemsWithName(data) {
     return new Promise(function(resolve, reject) {
-      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' FROM ?? WHERE Name like ? OR RetailPrice like ? OR Description like ?";    
+      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' "
+      selectQuery += "FROM ?? as it LEFT JOIN ?? as tr ON it.ID = tr.ItemID "
+      selectQuery += "WHERE Name like ? OR RetailPrice like ? OR Description like ? ";    
+      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID ";
+      selectQuery += "ORDER BY COUNT(it.ID) DESC";
       let value = ("%" + data.searchCritera + "%");
-      let query = mysql.format(selectQuery,["item", value, value, value]);
+      let query = mysql.format(selectQuery,["item", "transaction", value, value, value]);
       pool.query(query,(err, data) => {
           if(err) {
               console.error(err);
