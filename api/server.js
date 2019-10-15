@@ -363,6 +363,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
   paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
     if (error) {
         console.log(error.response);
+        res.render('error.ejs');
         throw error;
     } else {
         console.log(JSON.stringify(payment));

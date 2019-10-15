@@ -259,6 +259,23 @@ function addSellerToDatabase(data) {
         console.log(response.insertId);
     });
 }
+function addTransactionToDatabase(data) {
+    return new Promise(function(resolve, reject) {
+        let insertQuery = 'INSERT INTO transaction (BuyerID, ItemID) VALUES (?,?)'
+
+        var query = mysql.format(insertQuery, [data.UserID, data.ItemID]);
+
+        pool.query(query,(err, response) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows added
+            resolve(response.insertId);
+        });
+    });
+}
 
 function deleteItem(sku){
     return new Promise(function(resolve, reject) {
@@ -323,7 +340,7 @@ function updateUserPassword(data) {
                 return;
             }
             // rows updated
-            console.log(response.affectedRows);
+            //console.log(response.affectedRows);
             resolve(response.affectedRows);
         });
     });
@@ -369,6 +386,7 @@ module.exports = function() {
     this.getAllItems = getAllItems;
     this.getItemsWithName = getItemsWithName;
     this.addSellerToDatabase = addSellerToDatabase;
+    this.addTransactionToDatabase = addTransactionToDatabase;
     this.doesSellerExist = doesSellerExist;
     this.countUsersWithEmail = countUsersWithEmail;
     this.updateUserPassword = updateUserPassword;
