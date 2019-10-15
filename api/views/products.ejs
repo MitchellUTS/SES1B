@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+        content="ie=edge">
+        <title>PayPal Node</title>
+    </head>
+    <body>
+        <h1>All Products</h1>
+        <h3>Hi <%= name %></h3>
+        <% for(let i = 0; i < items.length; i++) { %>
+            <article>
+                <h2><%= items[i].name %> $<%= items[i].price %></h1>
+                <p><%= items[i].description %></p>
+                <form action="/pay" method="POST">
+                    <input type="hidden" name="sku" value=<%= items[i].sku %>>
+                    <input type="hidden" name="price" value=<%= items[i].price %>>
+                    <input type="hidden" name="name" value=<%= items[i].name %>>
+                    <input type="hidden" name="description" value=<%= items[i].description %>>
+                    <input type="submit" value="Buy">
+                </form>
+                <% if(items[i].sellerID === user) { %>
+                    <form action="/delete" method="POST">
+                        <input type="hidden" name="sku" value=<%= items[i].sku %>>
+                        <input type="hidden" name="price" value=<%= items[i].price %>>
+                        <input type="hidden" name="name" value=<%= items[i].name %>>
+                        <input type="hidden" name="description" value=<%= items[i].description %>>
+                        <input type="submit" value="Delete">
+                    </form>
+                <% } %>
+            </article>
+        <% } %>
+    </body>
+
+    <h3>Add an Item to the Catalogue:</h3>
+    <form action="/products/add" method="GET">
+        <input type="submit" value="Add Item">
+    </form>
+
+    <form action="/password/change">
+        <button type="submit">Change Password</button>
+    </form>
+
+    <form action="/logout">
+        <button type="submit">Logout</button>
+    </form>
+
+</html>

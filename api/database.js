@@ -294,7 +294,7 @@ function addItemToDatabase(data) {
 
     var query;
 
-    query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], 1, "'nope'"]);
+    query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], data.fieldValue[4], "'nope'"]);
 
     //console.log(query);
 
@@ -325,7 +325,7 @@ function deleteItem(sku){
 
 function getAllItems() {
     return new Promise(function(resolve, reject) {
-      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description' FROM ??";    
+      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' FROM ??";    
       let query = mysql.format(selectQuery,["item"]);
       // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
       pool.query(query,(err, data) => {
@@ -341,20 +341,29 @@ function getAllItems() {
     });
 }
 
-function sum(a,b) {
-    return a+b;
+function updateUserPassword(data) {
+    return new Promise(function(resolve, reject) {
+        let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
+        let query = mysql.format(updateQuery,["user","Password", data.Password,"EmailAddress", data.EmailAddress]);
+        // query = UPDATE `user` SET `EmailAddress`='12875822@student.uts.edu.au' WHERE `Name`='Matt'
+        pool.query(query,(err, response) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows updated
+            console.log(response.affectedRows);
+            resolve(response.affectedRows);
+        });
+    });
 }
 
-function multiply(a,b) {
-    return a*b;
-}
-
-module.exports = function() { 
-    this.sum = sum;
-    this.multiply = multiply;
+module.exports = function() {
     this.addItemToDatabase = addItemToDatabase;
     this.deleteItem = deleteItem;
     this.getAllItems = getAllItems;
+    this.updateUserPassword = updateUserPassword;
 }
 
 // for(let i = 0; i < 20; i++)
