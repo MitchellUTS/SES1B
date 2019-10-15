@@ -31,7 +31,7 @@
             background-color: #111;
             overflow-x: hidden;
         }
-        
+
         .button {
             float: left;
             background-color: #333;
@@ -71,7 +71,7 @@
             <form action="/logout">
                 <button type="submit" class="button logoutButton clickableButton">Logout</button>
             </form>
-    
+
         </div>
         <h1>All Products</h1>
         <h3>Hi <%= name %></h3>
@@ -86,6 +86,7 @@
             <h1>Hot Products</h1>
             <% for(; i < 3; i++) { %>
                 <div>
+                        <img src="<%= items[i].picture %>" width="256" height="256"/>
                     <h2><%= items[i].name %> $<%= items[i].price %></h1>
                     <p><%= items[i].description %></p>
                     <form action="/pay" method="POST">
@@ -98,9 +99,6 @@
                     <% if(items[i].sellerID === user) { %>
                         <form action="/delete" method="POST">
                             <input type="hidden" name="sku" value="<%= items[i].sku %>"">
-                            <input type="hidden" name="price" value="<%= items[i].price %>">
-                            <input type="hidden" name="name" value="<%= items[i].name %>">
-                            <input type="hidden" name="description" value="<%= items[i].description %>">
                             <input type="submit" value="Delete">
                         </form>
                     <% } %>
@@ -110,6 +108,8 @@
         <hr/>
         <% for(; i < items.length; i++) { %>
             <article>
+                <img src="<%= items[i].picture %>" width="256" height="256"/>
+                <% console.log(items[i].picture); %>
                 <h2><%= items[i].name %> $<%= items[i].price %></h1>
                 <p><%= items[i].description %></p>
                 <form action="/pay" method="POST">
@@ -122,9 +122,6 @@
                 <% if(items[i].sellerID === user) { %>
                     <form action="/delete" method="POST">
                         <input type="hidden" name="sku" value="<%= items[i].sku %>"">
-                        <input type="hidden" name="price" value="<%= items[i].price %>">
-                        <input type="hidden" name="name" value="<%= items[i].name %>">
-                        <input type="hidden" name="description" value="<%= items[i].description %>">
                         <input type="submit" value="Delete">
                     </form>
                 <% } %>

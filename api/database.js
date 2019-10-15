@@ -294,7 +294,7 @@ function addItemToDatabase(data) {
 
     var query;
 
-    query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], data.fieldValue[4], "'nope'"]);
+    query = mysql.format(insertQuery, [data.fieldValue[0], data.fieldValue[1], 0.00, data.fieldValue[2], data.fieldValue[3], data.fieldValue[4], data.fieldValue[5]]);
 
     //console.log(query);
 
@@ -360,9 +360,9 @@ function deleteItem(sku){
 
 function getAllItems() {
     return new Promise(function(resolve, reject) {
-      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' ";
+      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID', ImagePath as 'picture' ";
       selectQuery += "FROM ?? as it LEFT JOIN ?? as tr ON it.ID = tr.ItemID ";
-      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID ";
+      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID, it.ImagePath ";
       selectQuery += "ORDER BY COUNT(it.ID) DESC";
       let query = mysql.format(selectQuery,["item", "transaction"]);
       // query = SELECT * FROM `user` where `EmailAddress` = '12875833@student.uts.edu.au'
@@ -381,10 +381,10 @@ function getAllItems() {
 
 function getItemsWithName(data) {
     return new Promise(function(resolve, reject) {
-      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' "
+      let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID', ImagePath as 'picture' "
       selectQuery += "FROM ?? as it LEFT JOIN ?? as tr ON it.ID = tr.ItemID "
       selectQuery += "WHERE Name like ? OR RetailPrice like ? OR Description like ? ";    
-      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID ";
+      selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID, it.ImagePath ";
       selectQuery += "ORDER BY COUNT(it.ID) DESC";
       let value = ("%" + data.searchCritera + "%");
       let query = mysql.format(selectQuery,["item", "transaction", value, value, value]);
