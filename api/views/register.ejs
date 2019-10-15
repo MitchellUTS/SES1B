@@ -1,26 +1,37 @@
-<% if (!(message === "")) { %>
-    <%= message %>
-<% } %>
-<h1>Register</h1>
-<form action="/register" method="POST">
-    <div>
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <div>
-        <label for="seller">Are you a seller?</label>
-        <input type="checkbox" id="seller" name="seller">
-    </div>
-    <button type="submit">Register</button>
-</form>
-<form action="/login">
-    <button type="submit">Login</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+        content="ie=edge">
+        <title>Register</title>
+    </head>
+    <body>
+        <% if (!(message === "")) { %>
+            <%= message %>
+        <% } %>
+        <h1>Register</h1>
+        <form action="/register" method="POST">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <label for="seller">Are you a seller?</label>
+                <input type="checkbox" id="seller" name="seller">
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <form action="/login">
+            <button type="submit">Login</button>
+        </form>
+    </body>         
+</html>
