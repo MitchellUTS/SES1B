@@ -111,7 +111,7 @@ const pool = mysql.createPool({
     let json = {message: "Failed to the product, please fill in all the fields."}
     if(req.body.name.length > 0 && req.body.price.length > 0 && req.body.description.length > 0){
       json = {message: ("You successfully added: " + req.body.name + " to the catalogue." )};
-      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100, req.user.id]});
+      addItemToDatabase({'fieldValue': [req.body.name, req.body.description, req.body.price, 100, req.user.id, req.body.picture]});
     }
     else{
       console.log("Not all fields have been filled.");
