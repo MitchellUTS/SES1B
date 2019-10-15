@@ -369,7 +369,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
         let items = payment.transactions[0].item_list.items;
         if (payment.state === "approved") {
           for (let i = 0; i < items.length; i++)  {
-              //addTransactionToDatabase({UserID: req.user.id, ItemID: items[i].sku});
+              addTransactionToDatabase({UserID: req.user.id, ItemID: items[i].sku});
           }
         }
         
