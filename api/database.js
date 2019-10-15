@@ -394,12 +394,30 @@ function doesSellerExist(data) {
     });
 }
 
+function countUsersWithEmail(data) {
+    return new Promise(function(resolve, reject) {
+        let insertQuery = 'SELECT COUNT(EmailAddress) as ? FROM user WHERE EmailAddress = ?'
+        let query = mysql.format(insertQuery, ["count", data.Email]);
+
+        pool.query(query,(err, data) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows added
+            resolve(data[0].count);
+        });
+    });
+}
+
 module.exports = function() {
     this.addItemToDatabase = addItemToDatabase;
     this.deleteItem = deleteItem;
     this.getAllItems = getAllItems;
     this.addSellerToDatabase = addSellerToDatabase;
     this.doesSellerExist = doesSellerExist;
+    this.countUsersWithEmail = countUsersWithEmail;
     this.updateUserPassword = updateUserPassword;
 }
 

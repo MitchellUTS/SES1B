@@ -156,11 +156,17 @@ const pool = mysql.createPool({
   )
 
   app.get('/register', checkNotAuthenticated, (req, res) => {
-    res.render('register.ejs')
+    res.render('register.ejs', {message: ""});
   })
   
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
+      let userCount = await countUsersWithEmail({ Email: req.body.email });
+      if (userCount > 0) {
+        res.render('register.ejs', {message: ("Unable to register your account, an account already exists with the email: " + req.body.email)});
+        return;
+      }
+
       let isSeller = typeof req.body.seller !== 'undefined';
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
       var idVar;
@@ -195,7 +201,7 @@ const pool = mysql.createPool({
       sendVerificationEmail(req.body.email, req.body.name);
       res.redirect('/login')
     } catch {
-      res.redirect('/register')
+      res.render('register.ejs', {message: "Unable to register your account."});
     }
   })
 
