@@ -118,11 +118,18 @@ const pool = mysql.createPool({
     res.render('add.ejs', json);
   });
 
-  app.all('/products', checkAuthenticated, async (req, res) => {
+  app.get('/products', checkAuthenticated, async (req, res) => {
     //Add products in here to add to the catalogue page
     let sellerCount = await doesSellerExist({ID: req.user.id});
     let isSeller = sellerCount > 0;
     let products = await getAllItems();
+    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller })
+  })
+
+  app.post('/products', checkAuthenticated, async (req, res) => {
+    let sellerCount = await doesSellerExist({ID: req.user.id});
+    let isSeller = sellerCount > 0;
+    let products = await getItemsWithName({ searchCritera: req.body.searchCritera });
     res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller })
   })
   

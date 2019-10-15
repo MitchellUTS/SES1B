@@ -359,6 +359,24 @@ function getAllItems() {
     });
 }
 
+function getItemsWithName(data) {
+    return new Promise(function(resolve, reject) {
+      let selectQuery = "SELECT Name AS 'name', ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID' FROM ?? WHERE Name like ? OR RetailPrice like ? OR Description like ?";    
+      let value = ("%" + data.searchCritera + "%");
+      let query = mysql.format(selectQuery,["item", value, value, value]);
+      pool.query(query,(err, data) => {
+          if(err) {
+              console.error(err);
+              reject(err);
+              return;
+          }
+          // rows fetch
+          //console.log(data);
+          resolve(data);
+      });
+    });
+}
+
 function updateUserPassword(data) {
     return new Promise(function(resolve, reject) {
         let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
@@ -415,6 +433,7 @@ module.exports = function() {
     this.addItemToDatabase = addItemToDatabase;
     this.deleteItem = deleteItem;
     this.getAllItems = getAllItems;
+    this.getItemsWithName = getItemsWithName;
     this.addSellerToDatabase = addSellerToDatabase;
     this.doesSellerExist = doesSellerExist;
     this.countUsersWithEmail = countUsersWithEmail;
