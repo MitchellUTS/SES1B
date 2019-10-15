@@ -23,18 +23,18 @@
                     <h2><%= items[i].name %> $<%= items[i].price %></h1>
                     <p><%= items[i].description %></p>
                     <form action="/pay" method="POST">
-                        <input type="hidden" name="sku" value=<%= items[i].sku %>>
-                        <input type="hidden" name="price" value=<%= items[i].price %>>
-                        <input type="hidden" name="name" value=<%= items[i].name %>>
-                        <input type="hidden" name="description" value=<%= items[i].description %>>
+                        <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                        <input type="hidden" name="price" value="<%= items[i].price %>">
+                        <input type="hidden" name="name" value="<%= items[i].name %>">
+                        <input type="hidden" name="description" value="<%= items[i].description %>">
                         <input type="submit" value="Buy">
                     </form>
                     <% if(items[i].sellerID === user) { %>
                         <form action="/delete" method="POST">
-                            <input type="hidden" name="sku" value=<%= items[i].sku %>>
-                            <input type="hidden" name="price" value=<%= items[i].price %>>
-                            <input type="hidden" name="name" value=<%= items[i].name %>>
-                            <input type="hidden" name="description" value=<%= items[i].description %>>
+                            <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                            <input type="hidden" name="price" value="<%= items[i].price %>">
+                            <input type="hidden" name="name" value="<%= items[i].name %>">
+                            <input type="hidden" name="description" value="<%= items[i].description %>">
                             <input type="submit" value="Delete">
                         </form>
                     <% } %>
@@ -47,18 +47,18 @@
                 <h2><%= items[i].name %> $<%= items[i].price %></h1>
                 <p><%= items[i].description %></p>
                 <form action="/pay" method="POST">
-                    <input type="hidden" name="sku" value=<%= items[i].sku %>>
-                    <input type="hidden" name="price" value=<%= items[i].price %>>
-                    <input type="hidden" name="name" value=<%= items[i].name %>>
-                    <input type="hidden" name="description" value=<%= items[i].description %>>
+                    <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                    <input type="hidden" name="price" value="<%= items[i].price %>">
+                    <input type="hidden" name="name" value="<%= items[i].name %>">
+                    <input type="hidden" name="description" value="<%= items[i].description %>">
                     <input type="submit" value="Buy">
                 </form>
                 <% if(items[i].sellerID === user) { %>
                     <form action="/delete" method="POST">
-                        <input type="hidden" name="sku" value=<%= items[i].sku %>>
-                        <input type="hidden" name="price" value=<%= items[i].price %>>
-                        <input type="hidden" name="name" value=<%= items[i].name %>>
-                        <input type="hidden" name="description" value=<%= items[i].description %>>
+                        <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                        <input type="hidden" name="price" value="<%= items[i].price %>">
+                        <input type="hidden" name="name" value="<%= items[i].name %>">
+                        <input type="hidden" name="description" value="<%= items[i].description %>">
                         <input type="submit" value="Delete">
                     </form>
                 <% } %>
