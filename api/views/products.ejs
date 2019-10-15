@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -80,35 +81,11 @@
             <input type="text" id="searchCritera" name="searchCritera">
             <input type="submit" value="Search">
         </form>
-        <% let i = 0; %>
-        <% if(items.length > 3) { %>
-            <hr/>
-            <h1>Hot Products</h1>
-            <% for(; i < 3; i++) { %>
-                <div>
-                    <img src="<%= items[i].picture %>" width="256" height="256"/>
-                    <h2><%= items[i].name %> $<%= items[i].price %></h1>
-                    <p><%= items[i].description %></p>
-                    <form action="/pay" method="POST">
-                        <input type="hidden" name="sku" value="<%= items[i].sku %>"">
-                        <input type="hidden" name="price" value="<%= items[i].price %>">
-                        <input type="hidden" name="name" value="<%= items[i].name %>">
-                        <input type="hidden" name="description" value="<%= items[i].description %>">
-                        <input type="submit" value="Buy">
-                    </form>
-                    <% if(items[i].sellerID === user) { %>
-                        <form action="/delete" method="POST">
-                            <input type="hidden" name="sku" value="<%= items[i].sku %>"">
-                            <input type="submit" value="Delete">
-                        </form>
-                    <% } %>
-                </div>
-            <% } %>
-        <% } %>
-        <hr/>
-        <% for(; i < items.length; i++) { %>
-            <article>
-                <img src="<%= items[i].picture %>" width="256" height="256"/>
+        <h1>Hot Products</h1>
+        <div class="w3-row-padding w3-padding-16 w3-center" id="Hot Products">
+            <% for(let i = 0; i < 4; i++) { %>
+            <div class="w3-quarter">
+                <img src="<%= items[i].picture %>" style="width:100%">
                 <h2><%= items[i].name %> $<%= items[i].price %></h1>
                 <p><%= items[i].description %></p>
                 <form action="/pay" method="POST">
@@ -116,15 +93,42 @@
                     <input type="hidden" name="price" value="<%= items[i].price %>">
                     <input type="hidden" name="name" value="<%= items[i].name %>">
                     <input type="hidden" name="description" value="<%= items[i].description %>">
-                    <input type="submit" value="Buy">
+                    <input type="submit" class="button clickableButton" value="Buy">
                 </form>
                 <% if(items[i].sellerID === user) { %>
                     <form action="/delete" method="POST">
                         <input type="hidden" name="sku" value="<%= items[i].sku %>"">
-                        <input type="submit" value="Delete">
+                        <input type="submit" class="button clickableButton" value="Delete">
                     </form>
                 <% } %>
-            </article>
+            </div>
+            <% } %>
+        </div>
+        <h1>All Products</h1>
+        <hr/>
+        <% for(let j = 0; j < Math.ceil(items.length/4); j++) { %>
+            <div class="w3-row-padding w3-padding-16 w3-center" id="Hot Products">
+            <% for(let i = j*4; i < items.length && i < (j+1)*4; i++) { %>
+                <div class="w3-quarter">
+                    <img src="<%= items[i].picture %>" style="width:100%">
+                    <h2><%= items[i].name %> $<%= items[i].price %></h1>
+                    <p><%= items[i].description %></p>
+                    <form action="/pay" method="POST">
+                        <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                        <input type="hidden" name="price" value="<%= items[i].price %>">
+                        <input type="hidden" name="name" value="<%= items[i].name %>">
+                        <input type="hidden" name="description" value="<%= items[i].description %>">
+                        <input type="submit" class="button clickableButton" value="Buy">
+                    </form>
+                    <% if(items[i].sellerID === user) { %>
+                        <form action="/delete" method="POST">
+                            <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                            <input type="submit" class="button clickableButton" value="Delete">
+                        </form>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
         <% } %>
         
         <hr/>
