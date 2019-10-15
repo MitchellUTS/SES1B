@@ -45,71 +45,6 @@ const pool = mysql.createPool({
   
   const initializePassport = require('./passport-config')
 
-  
-  /*var max;
-  var tempUserId;
-  var tempUserName;
-  var tempUserEmail;
-  var tempUserPassword;
-  findHighestId(async function(result){
-  	  max = result;
-  	for (let i = 0; i < max; i++) {
-  		tempUserId = await populateUsersID(i);
-  		
-  		tempUserName = await populateUsersName(i);
-  		
-  		tempUserEmail = await populateUsersEmailAddress(i);
-
-  		tempUserPassword = await populateUsersPassword(i);
-  		users.push({
-  			id: tempUserId,
-	  	    name: tempUserName,
-	  	    email: tempUserEmail,
-	  	    password: tempUserPassword
-  		})
-  		//console.log(users[i]);
-  	  }
-  });
-
-async function sendEmail(recipients, subject, body) {
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, 
-        auth: {
-            user: 'softwarestudio1b@gmail.com', 
-            pass: 'Sasuke12345!' 
-        }
-    });
-
-    // send mail with defined transport object
-    let info = await transporter.sendMail({
-        from: '"No reply" <ayushdallakoti18@gmail.com>', // sender address
-        to: recipients, // list of receivers
-        subject: subject, // Subject line
-        text: body // plain text body
-        //html: '<b>Your email has been verified</b>' // html body
-    });
-
-    console.log('Message sent to: ' + recipients);
-}
-
-function generatePassword(length) {
-  return Math.random().toString(36).replace(/[^a-z0-9]+/g, '').substr(2, length);
-}
-
-function handle_database(req,res) {
-    // connection will be acquired automatically
-    pool.query("select * from user", function(err,rows){
-     if(err) {
-         return res.json({'error': true, 'message': 'Error occurred'+err});
-     }
-             //connection will be released as well.
-             res.json(rows);
-    });
-}
-
-//add rows in the table
 function registerUserAddRow(data) {
     var numberOfFields = data.fieldValue.length;
 
@@ -130,7 +65,6 @@ function registerUserAddRow(data) {
         console.log(response.insertId);
     });
 }
-
 //update rows
 function updateUserPassword(data) {
   let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
@@ -280,7 +214,7 @@ function populateUsersPassword(index) {
 	  });
 	});
 }
-
+/*
 async function f() {
   let results = await getAllItems();
   console.log(results);
@@ -419,6 +353,16 @@ module.exports = function() {
     this.doesSellerExist = doesSellerExist;
     this.countUsersWithEmail = countUsersWithEmail;
     this.updateUserPassword = updateUserPassword;
+    this.populateUsersID = populateUsersID;
+    this.populateUsersName = populateUsersName;
+    this.populateUsersEmailAddress = populateUsersEmailAddress;
+    this.populateUsersPassword = populateUsersPassword;
+    this.updateUserPassword = updateUserPassword;
+    this.findUserByEmail = findUserByEmail;
+    this.findUserIdByEmail = findUserIdByEmail;
+    this.findHighestId = findHighestId;
+    this.findPasswordById = findPasswordById;
+    this.registerUserAddRow = registerUserAddRow;
 }
 
 // for(let i = 0; i < 20; i++)
