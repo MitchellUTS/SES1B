@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-        content="ie=edge">
+<head>
+        <% include partials/head %>
         <title>Login</title>
-    </head>
-    <body>
-        <h1>Login</h1>
-        <% if (messages.error) { %>
-            <%= messages.error %>
-        <% } %>
-        <form action="/login" method="POST">
-            <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div>
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
+        <% include partials/head %>
+</head>
+<body>
+    <div class="container" style="padding: 15rem" >
+        <div class="" style="height: 20rem;">
+            <h1>Login</h1>
+            <% if (messages.error) { %>
+                <%= messages.error %>
+            <% } %>
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input class="form-control" type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input class="form-control" type="password" id="password" name="password" required>
+                </div>
+                <button class="btn btn-raised btn-primary" type="submit">Login</button>
+            </form>
+            <a class="btn btn-raised btn-primary" href="/register">Register</a>           <a class="btn btn-raised btn-primary" href="/password/reset">Forgot Password</a>
+        </div>
+    </div>
+        <% include partials/script %>
 
-        <form action="/register" method="get">
-            <input type="submit" value="Register">
-        </form>
-        <form action="/password/reset" method="get">
-            <input type="submit" value="Forgot Password">
-        </form>
-
-    </body>
+</body>
 </html>

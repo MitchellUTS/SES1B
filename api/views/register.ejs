@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-        content="ie=edge">
+<head>
+        <% include partials/head %>
         <title>Register</title>
-    </head>
-    <body>
-        <% if (!(message === "")) { %>
-            <%= message %>
-        <% } %>
-        <h1>Register</h1>
-        <form action="/register" method="POST">
-            <div>
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div>
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div>
-                <label for="seller">Are you a seller?</label>
-                <input type="checkbox" id="seller" name="seller">
-            </div>
-            <button type="submit">Register</button>
-        </form>
-        <form action="/login">
-            <button type="submit">Login</button>
-        </form>
-    </body>         
+</head>
+<body>
+    <div class="container" style="padding: 15rem" >
+        <div class="" style="height: 20rem;">
+            <% if (!(message === "")) { %>
+                <%= message %>
+            <% } %>
+            <h1>Register</h1>
+            <br>
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="seller">Are you a seller?</label>
+                    <input type="checkbox" id="seller" name="seller">
+                </div>
+                <button type="submit" class="btn btn-raised btn-primary">Register</button>
+            </form>
+            <form action="/login">
+                <button type="submit" class="btn btn-raised btn-primary">Login</button>
+            </form>
+        </div>
+    </div> 
 </html>

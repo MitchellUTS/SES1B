@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-        content="ie=edge">
+<head>
+        <% include partials/head %>
         <title>Add a Product</title>
-    </head>
-    <body>
-        <% if (!(message === "")) { %>
-            <%= message %>
-        <% } %>
-    
-        <h1>Add a product.</h1>
+</head>
+<body>
+    <div class="container" style="padding: 15rem" >
+        <div class="" style="height: 20rem;">
+            <% if (!(message === "")) { %>
+                <%= message %>
+            <% } %>
+        
+            <h1>Add a product</h1>
+            <br>
+            <form action="/products/add" method="POST">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" id="price" name="price" min="0" value="100.00" step=".01" class="form-control"  required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" class="form-control"  required>
+                </div>
+                <div class="form-group">
+                    <label for="picture">Image URL:</label>
+                    <input type="text" id="picture" name="picture" class="form-control"  required>
+                </div>
+                <button type="submit" class="btn btn-raised btn-primary">Add</button>
+            </form>
 
-        <form action="/products/add" method="POST">
-            <div>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div>
-                <label for="price">Price:</label>
-                <input type="number" id="price" name="price" min="0" value="100.00" step=".01" required>
-            </div>
-            <div>
-                <label for="description">Description:</label>
-                <input type="text" id="description" name="description" required>
-            </div>
-            <div>
-                <label for="picture">Image URL:</label>
-                <input type="text" id="picture" name="picture" required>
-            </div>
-            <button type="submit">Add</button>
-        </form>
+            <form action="/products">
+                <input type="submit" value="Return" class="btn btn-raised btn-primary">
+            </form>
+        </div>
+    </div>
 
-        <form action="/products">
-            <input type="submit" value="Return">
-        </form>
-
-    </body>
+</body>
 </html>
