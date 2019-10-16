@@ -347,7 +347,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
 
 });
   
-  app.get('/success', (req, res) => {
+  app.get('/success', checkAuthenticated, (req, res) => {
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     const payment = req.query.payment;
@@ -373,13 +373,14 @@ app.post('/pay', checkAuthenticated, (req, res) => {
           }
         }
         
-        res.render('success', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total});
+        res.render('success.ejs', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total});
     }
   });
+  //res.render('success.ejs');
 });
 
-app.get('/cancel', checkAuthenticated, function (req, res) {
-  res.render('cancel.ejs');
+app.get('/cancel', checkAuthenticated, (req, res) => {
+  res.render('cancel');
 });
   
 // catch 404 and forward to error handler
@@ -594,8 +595,5 @@ function populateUsersPassword(index) {
 }
 
 exports = app;
-
-//sendVerificationEmail("mitch@leenet.net.au", "Mitchell Lee");
-//sendPasswordResetEmail("mitch@leenet.net.au", "Mitchell Lee", "12NewPassword34");
 
 app.listen(port, () => console.log("Server Started. \nOpen localhost:" + port + " in your browser to view the page.\nListening on Port: " + port + "\nPress Ctrl + C to stop the server.\n"));
