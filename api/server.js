@@ -157,7 +157,7 @@ const pool = mysql.createPool({
   })
   
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-      successRedirect: '/',
+      successRedirect: '/products',
       failureRedirect: '/login',
       failureFlash: true
     })
@@ -177,10 +177,7 @@ const pool = mysql.createPool({
 
       let isSeller = typeof req.body.seller !== 'undefined';
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
-      var idVar;
-      findHighestId(function(result){
-    	  idVar = result + 1;
-      });
+      var idVar = await asyncFindHighestId() + 1;
       var nameVar = req.body.name;
       var emailVar = req.body.email;
       var passwordVar = hashedPassword;
@@ -194,9 +191,9 @@ const pool = mysql.createPool({
       //Insert query call
       setTimeout(() => {
       //call the function
-    	registerUserAddRow({
-    	  "fieldValue": [nameVar,emailVar,passwordVar]
-    	});
+      registerUserAddRow({
+        "fieldValue": [nameVar,emailVar,passwordVar]
+      });
       },5000);
 
       if (isSeller) {
@@ -500,6 +497,20 @@ function findHighestId(callback) {
 	      return callback(data[0].temp);
 	  });
 	}
+
+async function asyncFindHighestId() {
+  return new Promise(function (resolve, reject) {
+	  let selectQuery = 'SELECT count(*) as ? FROM ??';    
+    let query = mysql.format(selectQuery,["temp","user"]);
+	  pool.query(query,(err, data) => {
+	      if(err) {
+	          console.error(err);
+	          reject(err);
+        }
+	      resolve(data[0].temp);
+    });
+  });
+}
 
 function findPasswordById(id, callback) {
 	let selectQuery = 'SELECT * FROM ?? WHERE ?? = ? LIMIT 1';
