@@ -132,14 +132,16 @@ const pool = mysql.createPool({
     let sellerCount = await doesSellerExist({ID: req.user.id});
     let isSeller = sellerCount > 0;
     let products = await getAllItems();
-    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller })
+    let recommendations = await getItemRecommendations({BuyerID: req.user.id, searchCritera: ""});
+    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller, recommendations: recommendations })
   })
 
   app.post('/products', checkAuthenticated, async (req, res) => {
     let sellerCount = await doesSellerExist({ID: req.user.id});
     let isSeller = sellerCount > 0;
     let products = await getItemsWithName({ searchCritera: req.body.searchCritera });
-    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller })
+    let recommendations = await getItemRecommendations({BuyerID: req.user.id, searchCritera: req.body.searchCritera});
+    res.render('products.ejs', { name: req.user.name, user: req.user.id, items: products, isSeller: isSeller, recommendations: recommendations })
   })
   
   app.all('/', checkAuthenticated, (req, res) => {
@@ -380,8 +382,9 @@ app.get('/success', checkAuthenticated, (req, res) => {
       
         let products = await getItemRecommendations({BuyerID: req.user.id, searchCritera: ""});
         res.render('success.ejs', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total, items: products});
+      } else {
+        res.redirect('cancel.ejs');
       }
-      res.redirect('cancel.ejs');
     }
   });
   //res.render('success.ejs');
