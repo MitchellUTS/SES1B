@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <% include partials/head %>
+    <title>Test</title>
+</head>
+
+
+<body>
+<div class="container-fluid" style="padding: 2rem">
+    <h1>Recommendations Products</h1>
+    <hr />
+        <div class="card-deck" style="padding: 1rem">
+        <% for(let i = 0; i < items.length; i++) { %>
+                <div class="card" style="max-width: 27.5rem; height: 30rem">
+                    <img src="<%= items[i].picture %>"  class="card-img-top" alt="Card image cap" style="height: 60%">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= items[i].name %> $<%= items[i].price %></h1>
+                            <p class="card-text"><%= items[i].description %></p>
+                            <form action="/pay" method="POST">
+                                <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                                <input type="hidden" name="price" value="<%= items[i].price %>">
+                                <input type="hidden" name="name" value="<%= items[i].name %>">
+                                <input type="hidden" name="description" value="<%= items[i].description %>">
+                                <input type="submit" class="btn btn-primary" value="Buy">
+                            </form>
+                    </div>
+                </div>
+            
+        <% } %>
+    </div>
+</div>
+
+</body>
+
+
+</html>

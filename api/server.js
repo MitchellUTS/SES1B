@@ -10,9 +10,9 @@ if (process.env.NODE_ENV !== 'production') {
   var cookieParser = require('cookie-parser');
   var logger = require('morgan');
   var cors = require('cors');
-  var indexRouter = require('./routes/index');
+  /*var indexRouter = require('./routes/index');
   var usersRouter = require('./routes/users');
-  var testAPIRouter = require('./routes/testAPI');
+  var testAPIRouter = require('./routes/testAPI');*/
   const ejs = require('ejs');
   const paypal = require('paypal-rest-sdk');
   const app = express()
@@ -100,6 +100,14 @@ const pool = mysql.createPool({
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
+  app.get('/test', async (req, res) => {
+    let products = await getItemRecommendations({BuyerID: 3, searchCritera: ""});
+    /*getItemRecommendations({BuyerID: 3, searchCritera: ""}).then(products => {
+      res.render('test.ejs', { items: products })
+    });*/
+    res.render('test.ejs', { items: products })
+  })
+
   app.get('/products/add', checkAuthenticated, (req, res) => {
     res.render('add.ejs', {message: ""});
   });
@@ -153,7 +161,7 @@ const pool = mysql.createPool({
   })
 
   app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render('login.ejs')
+    res.render('login.ejs');
   })
   
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
@@ -344,7 +352,7 @@ app.post('/pay', checkAuthenticated, (req, res) => {
 
 });
   
-  app.get('/success', checkAuthenticated, (req, res) => {
+app.get('/success', checkAuthenticated, (req, res) => {
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     const payment = req.query.payment;
@@ -356,44 +364,32 @@ app.post('/pay', checkAuthenticated, (req, res) => {
     }]
   };
   
-  paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+  paypal.payment.execute(paymentId, execute_payment_json, async function (error, payment) {
     if (error) {
         console.log(error.response);
         res.render('error.ejs');
         //throw error;
     } else {
-        //console.log(payment.transactions);
-        let items = payment.transactions[0].item_list.items;
-        if (payment.state === "approved") {
-          for (let i = 0; i < items.length; i++)  {
-              addTransactionToDatabase({UserID: req.user.id, ItemID: items[i].sku});
-          }
+      //console.log(payment.transactions);
+      let items = payment.transactions[0].item_list.items;
+      if (payment.state === "approved") {
+        for (let i = 0; i < items.length; i++)  {
+            await addTransactionToDatabase({UserID: req.user.id, ItemID: items[i].sku});
         }
-        
-        res.render('success.ejs', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total});
+      
+      
+        let products = await getItemRecommendations({BuyerID: req.user.id, searchCritera: ""});
+        res.render('success.ejs', { payerId: payerId, paymentId: paymentId, payment: payment.transactions[0].amount.total, items: products});
+      }
+      res.redirect('cancel.ejs');
     }
   });
   //res.render('success.ejs');
 });
 
-app.get('/cancel', checkAuthenticated, (req, res) => {
-  res.render('cancel');
-});
-  
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.get('/cancel', checkAuthenticated, async (req, res) => {
+  let products = await getItemRecommendations({BuyerID: req.user.id, searchCritera: ""});
+  res.render('cancel', { items: products });
 });
 
 /*async function sendEmail(recipients, subject, body) {
@@ -604,6 +600,29 @@ function populateUsersPassword(index) {
 	  });
 	});
 }
+
+async function test() {
+  let a = await getItemRecommendations({BuyerID: 3, searchCritera: ""});
+  for (let i = 0; i < a.length; i++) {
+    console.log((i+1), a[i].sku);
+  }
+}
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
 
 exports = app;
 

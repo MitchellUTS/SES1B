@@ -8,9 +8,9 @@
         <% include partials/head %>
     </head>
     <body>
-        <div class="container" style="padding: 15rem" >
-            <div class="" style="height: 20rem;">
-                <h1>
+        <div class="container-fluid" style="padding: 5rem; align-self: center;" >
+            <div class="" style="height: 5rem; align-self: center;">
+                <h1 style=>
                     Payment Cancelled
                 </h1>
                 <form action="/" method="get">
@@ -18,5 +18,28 @@
                 </form>
             </div>
         </div>
+            <% if (items.length > 0) { %>
+                <h2>Recommended Products</h1>
+                <hr />
+                <div class="card-deck" style="padding: 2rem">
+                    <% for(let i = 0; i < items.length; i++) { %>
+                        <div class="card" style="max-width: 20rem; max-height: 20rem">
+                            <img src="<%= items[i].picture %>"  class="card-img-top" alt="Card image cap" style="height: 40%">
+                            <div class="card-body">
+                                <h5 class="card-title"><%= items[i].name %> $<%= items[i].price %></h1>
+                                <p class="card-text"><%= items[i].description %></p>
+                                <form action="/pay" method="POST">
+                                    <input type="hidden" name="sku" value="<%= items[i].sku %>"">
+                                    <input type="hidden" name="price" value="<%= items[i].price %>">
+                                    <input type="hidden" name="name" value="<%= items[i].name %>">
+                                    <input type="hidden" name="description" value="<%= items[i].description %>">
+                                    <input type="submit" class="btn btn-primary" value="Buy">
+                                </form>
+                            </div>
+                        </div>    
+                    <% } %>
+                </div>
+            <% } %>
+
     </body>
 </html>

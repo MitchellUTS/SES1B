@@ -401,6 +401,37 @@ function getItemsWithName(data) {
     });
 }
 
+function getItemRecommendations(data) {
+    return new Promise(function(resolve, reject) {
+        let subQuery = "SELECT ItemID, Count(ItemID) FROM ?? WHERE BuyerID IN ("
+        subQuery +=         "SELECT BuyerID FROM ?? WHERE ItemID IN ("
+        subQuery +=             "SELECT ItemID FROM ?? WHERE BuyerID = ?"
+        subQuery +=         ")"
+        subQuery +=    ") AND BuyerID != ? GROUP BY ItemID ORDER BY Count(ItemID) DESC LIMIT 0, 5"
+
+        let selectQuery = "SELECT Name AS 'name', it.ID AS 'sku', RetailPrice AS 'price', Description AS 'description', SellerID as 'sellerID', ImagePath as 'picture' "
+        selectQuery += "FROM ?? as it "
+        selectQuery += "INNER JOIN (" + subQuery + ") as tr ON it.ID = tr.ItemID "
+        selectQuery += "WHERE Name like ? OR RetailPrice like ? OR Description like ? ";    
+        selectQuery += "GROUP BY it.ID, it.Name, it.RetailPrice, it.Description, it.SellerID, it.ImagePath ";
+        selectQuery += "ORDER BY COUNT(it.ID) DESC";
+        
+        let userID = data.BuyerID;
+        let value = ("%" + data.searchCritera + "%");
+        let query = mysql.format(selectQuery,["item", "transaction", "transaction", "transaction", userID, userID, value, value, value]);
+        pool.query(query,(err, data) => {
+            if(err) {
+                console.error(err);
+                reject(err);
+                return;
+            }
+            // rows fetch
+            //console.log(data);
+            resolve(data);
+        });
+    });
+}
+
 function updateUserPassword(data) {
     return new Promise(function(resolve, reject) {
         let updateQuery = "UPDATE ?? SET ?? = ? WHERE ?? = ?";
@@ -458,6 +489,7 @@ module.exports = function() {
     this.deleteItem = deleteItem;
     this.getAllItems = getAllItems;
     this.getItemsWithName = getItemsWithName;
+    this.getItemRecommendations = getItemRecommendations;
     this.addSellerToDatabase = addSellerToDatabase;
     this.addTransactionToDatabase = addTransactionToDatabase;
     this.doesSellerExist = doesSellerExist;
